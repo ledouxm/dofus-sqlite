@@ -47,7 +47,10 @@ jobs:
         run: npm i -g cytrus-v6
 
       - name: Test
-        run: cytrus-v6 version --game dofus --release dofus3
+        run: cytrus-v6 version --game dofus --release dofus3 > version.txt
+
+      - name: read
+        run: cat version.txt
 
       # - name: Install dependencies
       #   working-directory: ./parser
