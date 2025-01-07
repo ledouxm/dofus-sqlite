@@ -1,7 +1,8 @@
-name: Extract data and release
-
+name: Check version and extract data
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *" # Runs every hour
   push:
     branches:
       - master
@@ -10,7 +11,46 @@ permissions:
   contents: write
 
 jobs:
+  check-version:
+    name: Check Game Version
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.version.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install cytrus-v6
+        run: npm i -g cytrus-v6
+
+      - name: Get current version
+        id: version
+        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
+
+      - name: Get latest release
+        id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          latest_version=$(gh release list -L 1 | cut -f 3 | sed 's/^v//')
+          echo "version=${latest_version}" >> $GITHUB_OUTPUT
+
+      - name: Check if new version
+        id: check
+        run: |
+          if [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+
   process-and-update:
+    needs: check-version
+    if: needs.check-version.outputs.should_release == 'true'
     name: Extract and Process Game Data
     runs-on: ubuntu-latest
 
@@ -48,10 +88,6 @@ jobs:
       - name: Install cytrus-v6
         run: npm i -g cytrus-v6
 
-      - name: Get current version
-        id: version
-        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
-
       - name: Install dependencies
         working-directory: ./parser
         run: pnpm install --frozen-lockfile
@@ -78,8 +114,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ steps.version.outputs.version }} \
-            --title "Release ${{ steps.version.outputs.version }}" \
+          gh release create v${{ needs.check-version.outputs.current_version }} \
+            --title "Release ${{ needs.check-version.outputs.current_version }}" \
             --draft=false \
             --prerelease=false
 
@@ -87,6 +123,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v${{ steps.version.outputs.version }} \
+          gh release upload v${{ needs.check-version.outputs.current_version }} \
             parser/json/* \
             parser/dofus.sqlite
