@@ -40,9 +40,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
+      - name: Install cytrus-v6
+        run: npm i -g cytrus-v6
+
       - name: Install dependencies
         working-directory: ./parser
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: pnpm install --frozen-lockfile
 
       - name: Extract data with cytrus
         working-directory: ./parser
@@ -65,7 +68,7 @@ jobs:
       - name: Get current version
         working-directory: ./parser
         id: version
-        run: echo "version=$(pnpm cytrus-v6 version --game dofus --release dofus3)" > $env:GITHUB_OUTPUT
+        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" > $env:GITHUB_OUTPUT
 
       - name: Create Release
         env:
@@ -81,5 +84,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload v${{ steps.version.outputs.version }} \
-            parser/json/* \
+            parser/json \
             parser/dofus.sqlite
