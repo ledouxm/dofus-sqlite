@@ -66,11 +66,10 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        working-directory: ./parser
         with:
           files: |
-            json/*
-            dofus.sqlite
+            parser/json/*
+            parser/dofus.sqlite
           tag_name: data-${{ steps.version.outputs.version }}
           name: Data Release ${{ steps.version.outputs.version }}
           body: |
