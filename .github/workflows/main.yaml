@@ -2,10 +2,7 @@ name: Check version and extract data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *" # Runs every hour
-  push:
-    branches:
-      - master
+    - cron: "0 * * * *"
 
 permissions:
   contents: write
@@ -119,6 +116,7 @@ jobs:
         run: |
           gh release create v${{ needs.check-version.outputs.current_version }} \
             --title "Release ${{ needs.check-version.outputs.current_version }}" \
+            --notes "This release is auto-generated." \
             --draft=false \
             --prerelease=false
 
