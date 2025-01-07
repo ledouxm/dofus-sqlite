@@ -35,8 +35,8 @@ jobs:
         with:
           path: |
             parser/node_modules
-            ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ github.workspace }}/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('parser/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
