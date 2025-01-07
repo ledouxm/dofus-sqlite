@@ -22,13 +22,20 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install cytrus-v6
-        run: npm install -g cytrus-v6
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            parser/node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         working-directory: ./parser
@@ -36,7 +43,7 @@ jobs:
 
       - name: Extract data with cytrus
         working-directory: ./parser
-        run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
+        run: pnpm cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
 
       - name: Parse files to JSON
         working-directory: ./parser
@@ -53,11 +60,13 @@ jobs:
           JSON_FOLDER: json/
 
       - name: Get current version
+        working-directory: ./parser
         id: version
-        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $env:GITHUB_OUTPUT
+        run: echo "version=$(pnpm cytrus-v6 version --game dofus --release dofus3)" >> $env:GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
+        working-directory: ./parser
         with:
           files: |
             json/*

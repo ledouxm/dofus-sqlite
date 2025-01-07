@@ -8,7 +8,8 @@
     "extract:dev": "vite-node --watch ./src/index.ts",
     "extract": "vite-node ./src/index.ts",
     "db:dev": "vite-node --watch ./src/generateDb.ts",
-    "db": "vite-node ./src/generateDb.ts"
+    "db": "vite-node ./src/generateDb.ts",
+    "cytrus-v6": "cytrus-v6"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.5",
+    "cytrus-v6": "^0.0.9",
     "typescript": "^5.7.2",
     "vite-node": "^2.1.8"
   },
