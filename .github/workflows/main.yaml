@@ -116,7 +116,12 @@ jobs:
         run: |
           gh release create v${{ needs.check-version.outputs.current_version }} \
             --title "Release ${{ needs.check-version.outputs.current_version }}" \
-            --notes "This release is auto-generated." \
+            --notes "Release contains:
+
+            - dofus.sqlite database file
+            - Corresponding JSON data files
+            
+            This release is auto-generated." \
             --draft=false \
             --prerelease=false
 
