@@ -3,6 +3,9 @@ name: Extract data and release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   process-and-update:
     name: Extract and Process Game Data
@@ -65,20 +68,18 @@ jobs:
         run: echo "version=$(pnpm cytrus-v6 version --game dofus --release dofus3)" >> $env:GITHUB_OUTPUT
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            parser/json/*
-            parser/dofus.sqlite
-          tag_name: data-${{ steps.version.outputs.version }}
-          name: Data Release ${{ steps.version.outputs.version }}
-          body: |
-            Automated data release for ${{ steps.version.outputs.version }}
-
-            Contains:
-            - Extracted JSON files
-            - SQLite database
-          draft: false
-          prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.version.outputs.version }} \
+            --title "Release ${{ steps.version.outputs.version }}" \
+            --draft=false \
+            --prerelease=false
+
+      - name: Upload Release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ steps.version.outputs.version }} \
+            parser/json/* \
+            parser/dofus.sqlite
