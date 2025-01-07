@@ -9,7 +9,7 @@ permissions:
 jobs:
   process-and-update:
     name: Extract and Process Game Data
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
