@@ -43,46 +43,49 @@ jobs:
       - name: Install cytrus-v6
         run: npm i -g cytrus-v6
 
-      - name: Install dependencies
-        working-directory: ./parser
-        run: pnpm install --frozen-lockfile
+      - name: Test
+        run: cytrus-v6 version --game dofus --release dofus3
 
-      - name: Extract data with cytrus
-        working-directory: ./parser
-        run: pnpm cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
+      # - name: Install dependencies
+      #   working-directory: ./parser
+      #   run: pnpm install --frozen-lockfile
 
-      - name: Parse files to JSON
-        working-directory: ./parser
-        run: pnpm extract
-        env:
-          INPUT_FOLDER: temp/
-          OUTPUT_FOLDER: json/
+      # - name: Extract data with cytrus
+      #   working-directory: ./parser
+      #   run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
 
-      - name: Update database
-        working-directory: ./parser
-        run: pnpm db
-        env:
-          DATABASE_URL: ./dofus.sqlite
-          JSON_FOLDER: json/
+      # - name: Parse files to JSON
+      #   working-directory: ./parser
+      #   run: pnpm extract
+      #   env:
+      #     INPUT_FOLDER: temp/
+      #     OUTPUT_FOLDER: json/
 
-      - name: Get current version
-        working-directory: ./parser
-        id: version
-        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" > $env:GITHUB_OUTPUT
+      # - name: Update database
+      #   working-directory: ./parser
+      #   run: pnpm db
+      #   env:
+      #     DATABASE_URL: ./dofus.sqlite
+      #     JSON_FOLDER: json/
 
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create v${{ steps.version.outputs.version }} \
-            --title "Release ${{ steps.version.outputs.version }}" \
-            --draft=false \
-            --prerelease=false
+      # - name: Get current version
+      #   working-directory: ./parser
+      #   id: version
+      #   run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" > $env:GITHUB_OUTPUT
 
-      - name: Upload Release Assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload v${{ steps.version.outputs.version }} \
-            parser/json \
-            parser/dofus.sqlite
+      # - name: Create Release
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh release create v${{ steps.version.outputs.version }} \
+      #       --title "Release ${{ steps.version.outputs.version }}" \
+      #       --draft=false \
+      #       --prerelease=false
+
+      # - name: Upload Release Assets
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh release upload v${{ steps.version.outputs.version }} \
+      #       parser/json \
+      #       parser/dofus.sqlite
