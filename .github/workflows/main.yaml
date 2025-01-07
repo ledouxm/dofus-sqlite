@@ -26,26 +26,22 @@ jobs:
           version: 8
 
       - name: Install dependencies
+        working-directory: ./parser
         run: pnpm install
 
       - name: Extract data with cytrus
         run: cytrus-v6 download --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
 
       - name: Parse files to JSON
+        working-directory: ./parser
         run: pnpm extract
         env:
           INPUT_FOLDER: temp/
           OUTPUT_FOLDER: json/
 
       - name: Update database
+        working-directory: ./parser
         run: pnpm db
         env:
           DATABASE_URL: ./dofus.sqlite
           JSON_FOLDER: json/
-
-      - name: Clean up
-        if: always()
-        run: |
-          # Optional cleanup steps
-          rm -rf temp/
-          rm -rf *.json
