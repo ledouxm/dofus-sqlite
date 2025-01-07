@@ -88,5 +88,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload v${{ steps.version.outputs.version }} \
-            parser/json \
+            parser/json/* \
             parser/dofus.sqlite
