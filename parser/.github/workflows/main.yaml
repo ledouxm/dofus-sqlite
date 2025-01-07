@@ -1,0 +1,24 @@
+name: Extract data and release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    name: Extract game data
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - name: Install cytrus v6
+        run: npm install -g cytrus-v6
+
+      - name: Extract data
+        run: cytrus-v6 download --release dofus3 --debug
