@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite-node --watch ./src/index.ts",
-    "db": "vite-node --watch ./src/generateDb.ts"
+    "extract:dev": "vite-node --watch ./src/index.ts",
+    "extract": "vite-node ./src/index.ts",
+    "db:dev": "vite-node --watch ./src/generateDb.ts",
+    "db": "vite-node ./src/generateDb.ts"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "m5P3ZNS/sQBA6llNYW/uPIfNvoE07/Dp4w52oi0HRRWqRaJk8HCTFvAmC6iUatBoO5XGiIMd8x50kHkI94ZRDg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\mledo\\AppData\\Local\\Ankama\\cs\\unity-bundle-unwrap.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mledo\\.nuget\\packages\\assetstools.net\\3.0.0\\assetstools.net.3.0.0.nupkg.sha512",
+    "C:\\Users\\mledo\\.nuget\\packages\\dotmake.commandline\\1.8.8\\dotmake.commandline.1.8.8.nupkg.sha512",
+    "C:\\Users\\mledo\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

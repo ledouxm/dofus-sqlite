@@ -7,4 +7,4 @@ Retro
 *.i18n.json
 *.zip
 node_modules
-cs
+output

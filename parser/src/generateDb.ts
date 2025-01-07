@@ -7,7 +7,7 @@ import sqlite from "better-sqlite3";
 
 dotenv.config();
 
-const OUTPUT_FOLDER = path.join(
+const JSON_FOLDER = (process.env.JSON_FOLDER = path.join(
   process.env.LOCALAPPDATA!,
   "Ankama",
   "Dofus-dofus3",
@@ -15,14 +15,16 @@ const OUTPUT_FOLDER = path.join(
   "StreamingAssets",
   "Content",
   "output",
-);
+));
+
+const DATABASE_URL = process.env.DATABASE_URL ?? "dofus.sqlite";
 
 const main = async () => {
   console.log("### GENERATING DATABASE FROM .JSON FILES");
-  const db = new sqlite("./staticDb3");
+  const db = new sqlite(DATABASE_URL);
   db.exec("PRAGMA journal_mode = WAL");
 
-  const files = await fs.readdir(OUTPUT_FOLDER);
+  const files = await fs.readdir(JSON_FOLDER);
 
   const time = Date.now();
 
@@ -31,7 +33,7 @@ const main = async () => {
       console.log("parsing", file);
       const resp = await createDatabaseFromJson(
         db,
-        path.join(OUTPUT_FOLDER, file),
+        path.join(JSON_FOLDER, file),
       );
     }
   }

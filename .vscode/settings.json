@@ -7,19 +7,5 @@
     "titleBar.inactiveBackground": "#0e975499",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.color": "#0e9754",
-  "sqltools.connections": [
-    {
-      "previewLimit": 50,
-      "driver": "SQLite",
-      "database": "${workspaceFolder:Ankama}/parser/staticDb3",
-      "name": "static3"
-    },
-    {
-      "previewLimit": 50,
-      "driver": "SQLite",
-      "database": "${workspaceFolder:Ankama}/parser/staticDb3",
-      "name": "aaaaa"
-    }
-  ]
+  "peacock.color": "#0e9754"
 }

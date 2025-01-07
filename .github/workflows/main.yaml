@@ -4,21 +4,48 @@ on:
   workflow_dispatch:
 
 jobs:
-  extract:
-    name: Extract game data
+  process-and-update:
+    name: Extract and Process Game Data
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup node
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install cytrus v6
+      - name: Install cytrus-v6
         run: npm install -g cytrus-v6
 
-      - name: Extract data
-        run: cytrus-v6 download --release dofus3 --debug
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Extract data with cytrus
+        run: cytrus-v6 download --release dofus3 --output temp/
+
+      - name: Parse files to JSON
+        run: pnpm extract
+        env:
+          INPUT_FOLDER: temp/
+          OUTPUT_FOLDER: json/
+
+      - name: Update database
+        run: pnpm db
+        env:
+          DATABASE_URL: ./dofus.sqlite
+          JSON_FOLDER: json/
+
+      - name: Clean up
+        if: always()
+        run: |
+          # Optional cleanup steps
+          rm -rf temp/
+          rm -rf *.json
