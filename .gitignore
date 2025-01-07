@@ -4,6 +4,8 @@ Dofus-dofus3
 Dofus-dofus3 - Copie
 Retro
 *.sqlite
+*-wal
+*-shm
 *.i18n.json
 *.zip
 node_modules

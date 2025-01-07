@@ -21,22 +21,30 @@ const JSON_FOLDER =
 
 const DATABASE_URL = process.env.DATABASE_URL ?? "dofus.sqlite";
 
+const safeRm = async (file: string) => {
+  try {
+    await fs.rm(file, {
+      force: true,
+    });
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 const main = async () => {
   console.log("### GENERATING DATABASE FROM .JSON FILES");
+  await safeRm(DATABASE_URL);
+
   const db = new sqlite(DATABASE_URL);
   db.exec("PRAGMA journal_mode = WAL");
 
   const files = await recursiveReadDir(JSON_FOLDER);
 
   const time = Date.now();
-
   for (const file of files) {
     if (file.endsWith(".json")) {
       console.log("parsing", file);
-      const resp = await createDatabaseFromJson(
-        db,
-        path.join(JSON_FOLDER, file),
-      );
+      const resp = await createDatabaseFromJson(db, file);
     }
   }
 
