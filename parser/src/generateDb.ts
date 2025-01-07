@@ -24,7 +24,7 @@ const main = async () => {
   const db = new sqlite(DATABASE_URL);
   db.exec("PRAGMA journal_mode = WAL");
 
-  const files = await fs.readdir(JSON_FOLDER);
+  const files = await recursiveReadDir(JSON_FOLDER);
 
   const time = Date.now();
 
@@ -41,6 +41,17 @@ const main = async () => {
   console.log("parsed", files.length, "files in", Date.now() - time, "ms");
 
   await generateTranslations("fr", db);
+};
+
+const recursiveReadDir = async (dir: string): Promise<string[]> => {
+  const dirents = await fs.readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    dirents.map((dirent) => {
+      const res = path.resolve(dir, dirent.name);
+      return dirent.isDirectory() ? recursiveReadDir(res) : res;
+    }),
+  );
+  return Array.prototype.concat(...files);
 };
 
 main();

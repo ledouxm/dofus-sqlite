@@ -29,7 +29,7 @@ jobs:
         run: pnpm install
 
       - name: Extract data with cytrus
-        run: cytrus-v6 download --release dofus3 --output temp/
+        run: cytrus-v6 download --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
 
       - name: Parse files to JSON
         run: pnpm extract
