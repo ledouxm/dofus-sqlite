@@ -55,12 +55,10 @@ const main = async () => {
   for (const file of files) {
     if (file.endsWith(".bundle")) {
       console.log("parseBundleFile", file);
+
       await parseBundleFile({
         inputFile: path.join(INPUT_FOLDER, "Data", file),
-        outputFile: path.join(
-          OUTPUT_FOLDER,
-          `${path.basename(file).replace(".bundle", "")}.json`,
-        ), //`../output/${file}.json`,
+        outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`), //`../output/${file}.json`,
       });
       //   await parseBundleFile({
       //     inputFile: `Data/${file}`,
@@ -68,6 +66,18 @@ const main = async () => {
       //   });
     }
   }
+};
+
+const PREFIX = "data_assets_";
+const SUFFIX = "root.asset.bundle";
+
+const getOutputJsonName = (inputFile: string) => {
+  const fileName = path.basename(inputFile);
+  if (fileName.startsWith(PREFIX) && fileName.endsWith(SUFFIX)) {
+    return fileName.replace(PREFIX, "").replace(SUFFIX, "");
+  }
+
+  return fileName;
 };
 
 const parseBundleFile = async ({

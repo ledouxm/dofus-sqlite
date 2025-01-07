@@ -35,7 +35,8 @@ jobs:
         run: pnpm install
 
       - name: Extract data with cytrus
-        run: cytrus-v6 download --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
+        working-directory: ./parser
+        run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
 
       - name: Parse files to JSON
         working-directory: ./parser
@@ -50,3 +51,26 @@ jobs:
         env:
           DATABASE_URL: ./dofus.sqlite
           JSON_FOLDER: json/
+
+      - name: Get current version
+        id: version
+        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            json/*
+            dofus.sqlite
+          tag_name: data-${{ steps.version.outputs.version }}
+          name: Data Release ${{ steps.version.outputs.version }}
+          body: |
+            Automated data release for ${{ steps.version.outputs.version }}
+
+            Contains:
+            - Extracted JSON files
+            - SQLite database
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

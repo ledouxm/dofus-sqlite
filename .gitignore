@@ -9,3 +9,5 @@ Retro
 node_modules
 output
 .env
+temp/
+json/
