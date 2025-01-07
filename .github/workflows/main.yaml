@@ -65,7 +65,10 @@ jobs:
       - name: Get current version
         working-directory: ./parser
         id: version
-        run: echo "version=$(pnpm cytrus-v6 version --game dofus --release dofus3)" > $env:GITHUB_OUTPUT
+        shell: pwsh
+        run: |
+          $version = (pnpm cytrus-v6 version --game dofus --release dofus3)
+          "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Create Release
         env:
