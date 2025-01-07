@@ -1,8 +1,6 @@
-import { GenericContainer, Wait } from "testcontainers";
 import path from "path";
 import dotenv from "dotenv";
 import fs from "fs/promises";
-import { parseBinFile } from "./parseTranslations";
 import { exec } from "child_process";
 import { createFoldersRecursively } from "./utils";
 
@@ -20,8 +18,6 @@ const OUTPUT_FOLDER = process.env.OUTPUT_FOLDER ?? "../output";
 const DLL_PATH = "../cs/bin/Debug/net7.0/unity-bundle-unwrap.dll";
 
 const main = async () => {
-  // const a = await parseBinFile(path.join(INPUT_FOLDER, INPUT_FILE));
-  // console.log(a);
   console.log("### PARSING BUNDLE FILES");
   const files = await fs.readdir(path.join(INPUT_FOLDER, "Data"));
 
@@ -58,12 +54,8 @@ const main = async () => {
 
       await parseBundleFile({
         inputFile: path.join(INPUT_FOLDER, "Data", file),
-        outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`), //`../output/${file}.json`,
+        outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`),
       });
-      //   await parseBundleFile({
-      //     inputFile: `Data/${file}`,
-      //     outputFile: `output/${file}.json`,
-      //   });
     }
   }
 };
@@ -80,6 +72,7 @@ const getOutputJsonName = (inputFile: string) => {
   return fileName;
 };
 
+// Shamefully stolen from https://github.com/dofusdude/doduda
 const parseBundleFile = async ({
   inputFile,
   outputFile,
@@ -107,22 +100,6 @@ const parseBundleFile = async ({
       },
     );
   });
-  // const container = await new GenericContainer("stelzo/doduda-umbu:amd64")
-  //   .withCommand([
-  //     "dotnet",
-  //     "out/unity-bundle-unwrap.dll",
-  //     `/app/data/${inputFile}`,
-  //     `/app/data/${outputFile}`,
-  //   ])
-  //   .withBindMounts([
-  //     {
-  //       source: INPUT_FOLDER,
-  //       target: "/app/data",
-  //     },
-  //   ])
-  //   .start();
-
-  // await container.stop();
 };
 
 main();
