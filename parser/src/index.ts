@@ -4,12 +4,16 @@ import dotenv from "dotenv";
 import fs from "fs/promises";
 import { parseBinFile } from "./parseTranslations";
 import { exec } from "child_process";
+import { createFoldersRecursively } from "./utils";
 
 dotenv.config();
 
-const INPUT_FOLDER =
-  process.env.INPUT_FOLDER ??
-  path.join("../output", "Dofus_Data", "StreamingAssets", "Content");
+const INPUT_FOLDER = path.join(
+  process.env.INPUT_FOLDER ?? "../output",
+  "Dofus_Data",
+  "StreamingAssets",
+  "Content",
+);
 
 const OUTPUT_FOLDER = process.env.OUTPUT_FOLDER ?? "../output";
 
@@ -20,6 +24,8 @@ const main = async () => {
   // console.log(a);
   console.log("### PARSING BUNDLE FILES");
   const files = await fs.readdir(path.join(INPUT_FOLDER, "Data"));
+
+  await createFoldersRecursively(OUTPUT_FOLDER);
 
   const dllExists = await fs
     .access(DLL_PATH)

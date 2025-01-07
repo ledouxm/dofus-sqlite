@@ -8,3 +8,4 @@ Retro
 *.zip
 node_modules
 output
+.env
