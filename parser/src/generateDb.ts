@@ -7,15 +7,17 @@ import sqlite from "better-sqlite3";
 
 dotenv.config();
 
-const JSON_FOLDER = (process.env.JSON_FOLDER = path.join(
-  process.env.LOCALAPPDATA!,
-  "Ankama",
-  "Dofus-dofus3",
-  "Dofus_Data",
-  "StreamingAssets",
-  "Content",
-  "output",
-));
+const JSON_FOLDER =
+  process.env.JSON_FOLDER ??
+  path.join(
+    process.env.LOCALAPPDATA!,
+    "Ankama",
+    "Dofus-dofus3",
+    "Dofus_Data",
+    "StreamingAssets",
+    "Content",
+    "output",
+  );
 
 const DATABASE_URL = process.env.DATABASE_URL ?? "dofus.sqlite";
 
