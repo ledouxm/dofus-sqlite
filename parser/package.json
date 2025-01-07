@@ -1,5 +1,5 @@
 {
-  "name": "parser",
+  "name": "dofus-sqlite",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
