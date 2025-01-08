@@ -139,10 +139,13 @@ jobs:
 
           gh release create v${{ needs.check-version.outputs.release_tag }} \
             --title "Release ${{ needs.check-version.outputs.release_tag }}" \
-            --notes "Release contains:
+            --notes "[Here is a quick link to dofus.sqlite](https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
+            
+            Release contains:
 
             - dofus.sqlite database file
-            - Corresponding JSON data files
+            - i18n files
+            - Dofus 3 data files (quests, achievements, mapPositions, )
             
             This release is auto-generated." \
             --draft=false \

@@ -226,6 +226,7 @@ export async function createDatabaseFromJson(
     // Group data by class
     const groupedData = new Map<string, TypedReference[]>();
     jsonData.forEach((ref) => {
+      if (!ref.type.class) return;
       if (!groupedData.has(ref.type.class)) {
         groupedData.set(ref.type.class, []);
       }
