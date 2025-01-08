@@ -42,15 +42,17 @@ const main = async () => {
 
   const time = Date.now();
   for (const file of files) {
-    if (file.endsWith(".json")) {
-      console.log("parsing", file);
-      const resp = await createDatabaseFromJson(db, file);
+    if (!file.endsWith(".json")) continue;
+
+    if (file.includes("i18n_")) {
+      await generateTranslations(file, db);
+    } else {
+      await createDatabaseFromJson(db, file);
     }
   }
 
   console.log("parsed", files.length, "files in", Date.now() - time, "ms");
-
-  await generateTranslations("fr", db);
+  db.close();
 };
 
 const recursiveReadDir = async (dir: string): Promise<string[]> => {

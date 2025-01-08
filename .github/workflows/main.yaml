@@ -32,7 +32,7 @@ jobs:
           node-version: "20"
 
       - name: Install cytrus-v6
-        run: npm i -g cytrus-v6
+        run: npm i -g cytrus-v6@0.1.1
 
       - name: Get current version
         id: version
@@ -112,7 +112,7 @@ jobs:
 
       - name: Extract data with cytrus
         working-directory: ./parser
-        run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle
+        run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle --select **/StreamingAssets/Content/Data/I18n/*.bin
 
       - name: Parse files to JSON
         working-directory: ./parser

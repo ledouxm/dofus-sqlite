@@ -3,10 +3,11 @@ import dotenv from "dotenv";
 import fs from "fs/promises";
 import { exec } from "child_process";
 import { createFoldersRecursively } from "./utils";
+import { parseTranslations, readSingleTranslation } from "./parseTranslations";
 
 dotenv.config();
 
-const INPUT_FOLDER = path.join(
+export const INPUT_FOLDER = path.join(
   process.env.INPUT_FOLDER ?? "../output",
   "Dofus_Data",
   "StreamingAssets",
@@ -19,7 +20,8 @@ const DLL_PATH = "../cs/bin/Debug/net7.0/unity-bundle-unwrap.dll";
 
 const main = async () => {
   console.log("### PARSING BUNDLE FILES");
-  const files = await fs.readdir(path.join(INPUT_FOLDER, "Data"));
+  const bundleFiles = await fs.readdir(path.join(INPUT_FOLDER, "Data"));
+  const translationsFiles = await fs.readdir(path.join(INPUT_FOLDER, "I18n"));
 
   await createFoldersRecursively(OUTPUT_FOLDER);
 
@@ -48,14 +50,25 @@ const main = async () => {
     });
   }
 
-  for (const file of files) {
-    if (file.endsWith(".bundle")) {
-      console.log("parseBundleFile", file);
+  // for (const file of bundleFiles) {
+  //   if (file.endsWith(".bundle")) {
+  //     console.log("parsing bundle file", file);
 
-      await parseBundleFile({
-        inputFile: path.join(INPUT_FOLDER, "Data", file),
-        outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`),
-      });
+  //     await parseBundleFile({
+  //       inputFile: path.join(INPUT_FOLDER, "Data", file),
+  //       outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`),
+  //     });
+  //   }
+  // }
+
+  for (const file of translationsFiles) {
+    if (file.endsWith(".bin")) {
+      console.log("parsing translation file", file, "to", OUTPUT_FOLDER);
+
+      await parseTranslations(
+        path.join(INPUT_FOLDER, "I18n", file),
+        OUTPUT_FOLDER,
+      );
     }
   }
 };
@@ -84,7 +97,7 @@ const parseBundleFile = async ({
     exec(
       `dotnet ${DLL_PATH} ${inputFile} ${outputFile}`,
       (error, stdout, stderr) => {
-        console.log(stdout);
+        // console.log(stdout);
 
         if (error) {
           console.error(`exec error: ${error}`);
