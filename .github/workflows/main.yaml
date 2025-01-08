@@ -55,15 +55,6 @@ jobs:
             echo "tag=${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Check if new version
-        id: check
-        run: |
-          if [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
-            echo "should_release=true" >> $GITHUB_OUTPUT
-          else
-            echo "should_release=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Check if should release
         id: check
         run: |
