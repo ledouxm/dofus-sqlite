@@ -75,8 +75,14 @@ function analyzeSchema(
     isPrimaryKey: true,
   };
 
+  const nullableMap = new Set<string>(Object.keys(data));
+
   for (const [key, value] of Object.entries(data)) {
     if (key === "id") continue;
+
+    if (value) {
+      nullableMap.delete(key);
+    }
 
     if (isArrayField(value) && key.endsWith("Ids")) {
       schema.junctionTables[key] = {
@@ -88,17 +94,20 @@ function analyzeSchema(
       value !== null &&
       !Array.isArray(value)
     ) {
-      // Handle nested objects by JSON stringify
       schema.fields[key] = {
         type: "TEXT",
-        isNullable: true,
+        isNullable: undefined,
       };
     } else {
       schema.fields[key] = {
         type: inferSqliteType(value),
-        isNullable: true,
+        isNullable: undefined,
       };
     }
+  }
+
+  for (const nullableField of nullableMap) {
+    schema.fields[nullableField].isNullable = true;
   }
 
   return schema;
@@ -116,7 +125,7 @@ function generateCreateTableSql(
       const constraints: any[] = [field.type];
 
       if (field.isPrimaryKey) {
-        constraints.push("PRIMARY KEY");
+        constraints.push("NOT NULL PRIMARY KEY");
       }
       if (!field.isNullable) {
         constraints.push("NOT NULL");
