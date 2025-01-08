@@ -50,16 +50,16 @@ const main = async () => {
     });
   }
 
-  // for (const file of bundleFiles) {
-  //   if (file.endsWith(".bundle")) {
-  //     console.log("parsing bundle file", file);
+  for (const file of bundleFiles) {
+    if (file.endsWith(".bundle")) {
+      console.log("parsing bundle file", file);
 
-  //     await parseBundleFile({
-  //       inputFile: path.join(INPUT_FOLDER, "Data", file),
-  //       outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`),
-  //     });
-  //   }
-  // }
+      await parseBundleFile({
+        inputFile: path.join(INPUT_FOLDER, "Data", file),
+        outputFile: path.join(OUTPUT_FOLDER, `${getOutputJsonName(file)}.json`),
+      });
+    }
+  }
 
   for (const file of translationsFiles) {
     if (file.endsWith(".bin")) {
