@@ -49,7 +49,7 @@ jobs:
       - name: Determine release tag
         id: tag
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" && [ -n "${{ inputs.release_tag }}" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_tag }}" ]; then
             echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
           else
             echo "tag=${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
