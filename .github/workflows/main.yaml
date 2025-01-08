@@ -139,7 +139,7 @@ jobs:
 
           gh release create v${{ needs.check-version.outputs.release_tag }} \
             --title "Release ${{ needs.check-version.outputs.release_tag }}" \
-            --notes "[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus.sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
+            --notes "[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
             
             Release contains:
 
