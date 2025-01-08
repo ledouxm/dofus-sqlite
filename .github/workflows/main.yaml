@@ -1,8 +1,14 @@
 name: Check version and extract data
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Custom tag for the release"
+        required: true
+        type: string
+
   schedule:
-    - cron: "0 * * * *"
+    cron: "0 * * * *"
 
 permissions:
   contents: write
@@ -14,6 +20,7 @@ jobs:
     outputs:
       current_version: ${{ steps.version.outputs.version }}
       should_release: ${{ steps.check.outputs.should_release }}
+      release_tag: ${{ steps.tag.outputs.tag }}
 
     steps:
       - name: Checkout repository
@@ -39,10 +46,30 @@ jobs:
           latest_version=$(gh release list -L 1 | cut -f 3 | sed 's/^v//')
           echo "version=${latest_version}" >> $GITHUB_OUTPUT
 
+      - name: Determine release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] then
+            echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check if new version
         id: check
         run: |
           if [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if should release
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
             echo "should_release=true" >> $GITHUB_OUTPUT
           else
             echo "should_release=false" >> $GITHUB_OUTPUT
@@ -114,8 +141,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create v${{ needs.check-version.outputs.current_version }} \
-            --title "Release ${{ needs.check-version.outputs.current_version }}" \
+          is_prerelease=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            is_prerelease="--prerelease"
+          fi
+
+          gh release create v${{ needs.check-version.outputs.release_tag }} \
+            --title "Release ${{ needs.check-version.outputs.release_tag }}" \
             --notes "Release contains:
 
             - dofus.sqlite database file
@@ -123,12 +155,12 @@ jobs:
             
             This release is auto-generated." \
             --draft=false \
-            --prerelease=false
+            $is_prerelease
 
       - name: Upload Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v${{ needs.check-version.outputs.current_version }} \
+          gh release upload v${{ needs.check-version.outputs.release_tag }} \
             parser/json/* \
             parser/dofus.sqlite
