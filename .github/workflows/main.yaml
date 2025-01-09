@@ -70,7 +70,7 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
     name: Extract and Process Game Data
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -132,29 +132,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          is_prerelease=""
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            is_prerelease="--prerelease"
-          fi
+          $isPrerelease = ""
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+              $isPrerelease = "--prerelease"
+          }
 
-          gh release create v${{ needs.check-version.outputs.release_tag }} \
-            --title "Release ${{ needs.check-version.outputs.release_tag }}" \
-            --notes "[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
-            
-            Release contains:
+          $notes = @"
+[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
 
-            - dofus.sqlite database file
-            - i18n files
-            - Dofus 3 data files (quests, achievements, mapPositions, )
-            
-            This release is auto-generated." \
-            --draft=false \
-            $is_prerelease
+Release contains:
+
+- dofus.sqlite database file
+- i18n files
+- Dofus 3 data files (quests, achievements, mapPositions, )
+
+This release is auto-generated.
+"@
+
+          gh release create "v${{ needs.check-version.outputs.release_tag }}" --title "Release ${{ needs.check-version.outputs.release_tag }}" --notes "$notes" --draft=false $isPrerelease
 
       - name: Upload Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload v${{ needs.check-version.outputs.release_tag }} \
-            parser/json/* \
-            parser/dofus.sqlite
+        run: gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/json/* parser/dofus.sqlite
