@@ -8,7 +8,8 @@ const args = [
 
 console.log("dumping");
 const dumper = spawn(exePath, args, {
-  stdio: ["pipe", "pipe", "pipe"],
+  stdio: "inherit", // This will pipe everything directly to the parent process
+  shell: true, // Sometimes needed for Windows executables in Actions
 });
 
 dumper.stdout.on("data", (data) => {
