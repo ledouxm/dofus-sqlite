@@ -1,6 +1,9 @@
 name: Test
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat/add-proto
 
 jobs:
   test:
@@ -11,22 +14,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+      - name: Cache workflow state
+        id: cache-state
+        uses: actions/cache@v3
         with:
-          dotnet-version: "7"
+          path: |
+            parser/temp
+            Il2CppDumper/DummyDll
+          key: ${{ runner.os }}-workflow-state-${{ hashFiles('parser/temp/**', 'Il2CppDumper/DummyDll/**') }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install cytrus-v6 and download
+      - name: Setup and download (if cache miss)
+        if: steps.cache-state.outputs.cache-hit != 'true'
         run: |
+          dotnet --version
           npm i -g cytrus-v6@0.1.1
           cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/GameAssembly.dll --select **/global-metadata.dat
 
-      - name: Run Il2CppDumper|
+      - name: Run Il2CppDumper
         shell: cmd
         run: Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
 
