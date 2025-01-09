@@ -154,4 +154,9 @@ jobs:
       - name: Upload Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/json/* parser/dofus.sqlite
+        run: |
+          $files = Get-ChildItem -Path "parser/json" -File
+          foreach ($file in $files) {
+              gh release upload "v${{ needs.check-version.outputs.release_tag }}" $file.FullName
+          }
+          gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/dofus.sqlite
