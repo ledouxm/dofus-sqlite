@@ -70,21 +70,11 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
     name: Extract and Process Game Data
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "7"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -128,33 +118,46 @@ jobs:
           DATABASE_URL: ./dofus.sqlite
           JSON_FOLDER: json/
 
+      - name: Run Il2CppDumper
+        run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+        shell: pwsh
+
+      - name: Run protodec
+        run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
+
       - name: Create Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          is_prerelease=""
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            is_prerelease="--prerelease"
-          fi
+          $isPrerelease = ""
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+              $isPrerelease = "--prerelease"
+          }
 
-          gh release create v${{ needs.check-version.outputs.release_tag }} \
-            --title "Release ${{ needs.check-version.outputs.release_tag }}" \
-            --notes "[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
-            
-            Release contains:
+          $notes = @"
+          Quick links:
+            - [dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
+            - [dofus.proto](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.proto)
 
-            - dofus.sqlite database file
-            - i18n files
-            - Dofus 3 data files (quests, achievements, mapPositions, )
-            
-            This release is auto-generated." \
-            --draft=false \
-            $is_prerelease
+          Release contains:
+
+          - dofus.sqlite database file
+          - i18n files
+          - Dofus 3 data files (quests, achievements, mapPositions, )
+          - Dofus obfuscated proto file
+
+          This release is auto-generated.
+          "@
+
+          gh release create "v${{ needs.check-version.outputs.release_tag }}" --title "Release ${{ needs.check-version.outputs.release_tag }}" --notes "$notes" --draft=false $isPrerelease
 
       - name: Upload Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v${{ needs.check-version.outputs.release_tag }} \
-            parser/json/* \
-            parser/dofus.sqlite
+          $files = Get-ChildItem -Path "parser/json" -File
+          foreach ($file in $files) {
+              gh release upload "v${{ needs.check-version.outputs.release_tag }}" $file.FullName
+          }
+          gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/dofus.sqlite
+          gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/dofus.proto

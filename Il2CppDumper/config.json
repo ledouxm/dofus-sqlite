@@ -9,7 +9,7 @@
   "GenerateDummyDll": true,
   "GenerateStruct": false,
   "DummyDllAddToken": false,
-  "RequireAnyKey": true,
+  "RequireAnyKey": false,
   "ForceIl2CppVersion": false,
   "ForceVersion": 16,
   "ForceDump": false,
