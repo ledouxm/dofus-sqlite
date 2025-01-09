@@ -22,7 +22,7 @@ jobs:
           cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/GameAssembly.dll --select **/global-metadata.dat
 
       - name: Run Il2CppDumper|
-        run: node ./dump.js
+        run: echo. | .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat 2>&1
 
       - name: Run protodec
         run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\output.proto --include-properties-without-non-user-code-attribute

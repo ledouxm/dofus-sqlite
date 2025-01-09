@@ -6,21 +6,18 @@ const args = [
   "./parser/temp/Dofus_Data/il2cpp_data/Metadata/global-metadata.dat",
 ]; // Add command line arguments here if needed
 
-console.log("dumping");
-const dumper = spawn(exePath, args, {
-  stdio: "inherit", // This will pipe everything directly to the parent process
-  shell: true, // Sometimes needed for Windows executables in Actions
+const process = spawn(exePath, args, {
+  stdio: ["pipe", "pipe", "pipe"],
 });
 
-dumper.stdout.on("data", (data) => {
+process.stdout.on("data", (data) => {
   console.log(data.toString());
 });
 
-dumper.stderr.on("data", (data) => {
+process.stderr.on("data", (data) => {
   console.error(data.toString());
 });
 
-dumper.on("exit", (code) => {
+process.on("exit", (code) => {
   console.log(`Process exited with code ${code}`);
-  process.exit(0);
 });
