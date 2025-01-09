@@ -1,9 +1,6 @@
 name: Test
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feat/add-proto
 
 jobs:
   test:
@@ -13,26 +10,3 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install cytrus-v6 and download
-        run: |
-          npm i -g cytrus-v6@0.1.1
-          cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/GameAssembly.dll --select **/global-metadata.dat
-
-      # - name: Set permissions
-      #   run: |
-      #     icacls ".\Il2CppDumper\Il2CppDumper.exe" /grant Everyone:F
-      #     icacls ".\temp\GameAssembly.dll" /grant Everyone:F
-      #     icacls ".\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat" /grant Everyone:F
-
-      # - name: Check environment
-      #   run: |
-      #     [Environment]::Is64BitOperatingSystem
-      #     [Environment]::Is64BitProcess
-
-      - name: Run Il2CppDumper
-        run: .\Il2CppDumper\Il2CppDumper.exe .\temp\GameAssembly.dll .\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
-        shell: pwsh
-
-      - name: Run protodec
-        run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\output.proto --include-properties-without-non-user-code-attribute

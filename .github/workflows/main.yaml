@@ -128,6 +128,13 @@ jobs:
           DATABASE_URL: ./dofus.sqlite
           JSON_FOLDER: json/
 
+      - name: Run Il2CppDumper
+        run: .\Il2CppDumper\Il2CppDumper.exe .\temp\GameAssembly.dll .\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+        shell: pwsh
+
+      - name: Run protodec
+        run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
+
       - name: Create Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -138,13 +145,16 @@ jobs:
           }
 
           $notes = @"
-          [Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
+          Quick links:
+            - [dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
+            - [dofus.proto](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.proto)
 
           Release contains:
 
           - dofus.sqlite database file
           - i18n files
           - Dofus 3 data files (quests, achievements, mapPositions, )
+          - Dofus obfuscated proto file
 
           This release is auto-generated.
           "@
@@ -160,3 +170,4 @@ jobs:
               gh release upload "v${{ needs.check-version.outputs.release_tag }}" $file.FullName
           }
           gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/dofus.sqlite
+          gh release upload "v${{ needs.check-version.outputs.release_tag }}" parser/dofus.proto
