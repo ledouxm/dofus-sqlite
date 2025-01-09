@@ -16,12 +16,9 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install cytrus-v6
-        run: npm i -g cytrus-v6@0.1.1
-
       - name: Get current version
         id: version
-        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
+        run: Write-Output "version-$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
 
       - name: echo version
         run: echo "${{ steps.version.outputs.version }}"
