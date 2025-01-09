@@ -22,6 +22,7 @@ jobs:
             parser/temp
             Il2CppDumper/DummyDll
           key: ${{ runner.os }}-workflow-state-${{ hashFiles('parser/temp/**', 'Il2CppDumper/DummyDll/**') }}
+          save-on-error: true
 
       - name: Setup and download (if cache miss)
         if: steps.cache-state.outputs.cache-hit != 'true'
