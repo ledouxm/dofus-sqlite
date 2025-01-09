@@ -138,16 +138,16 @@ jobs:
           }
 
           $notes = @"
-[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
+          [Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
 
-Release contains:
+          Release contains:
 
-- dofus.sqlite database file
-- i18n files
-- Dofus 3 data files (quests, achievements, mapPositions, )
+          - dofus.sqlite database file
+          - i18n files
+          - Dofus 3 data files (quests, achievements, mapPositions, )
 
-This release is auto-generated.
-"@
+          This release is auto-generated.
+          "@
 
           gh release create "v${{ needs.check-version.outputs.release_tag }}" --title "Release ${{ needs.check-version.outputs.release_tag }}" --notes "$notes" --draft=false $isPrerelease
 
