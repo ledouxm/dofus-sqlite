@@ -16,9 +16,13 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Get current version
-        id: version
-        run: Write-Output "version=$(npx cytrus-v6 version --game dofus --release dofus3)" >> $env:GITHUB_OUTPUT
+      - name: Install cytrus-v6 and download
+        run: |
+          npm i -g cytrus-v6@0.1.1
+          cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/GameAssembly.dll --select **/global-metadata.dat
 
-      - name: echo version
-        run: echo "${{ steps.version.outputs.version }}"
+      - name: Run Il2CppDumper
+        run: .\Il2CppDumper\Il2CppDumper.exe ".\parser\temp\GameAssembly.dll" ".\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat"
+
+      - name: Run protodec
+        run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\output.proto --include-properties-without-non-user-code-attribute
