@@ -129,7 +129,7 @@ jobs:
           JSON_FOLDER: json/
 
       - name: Run Il2CppDumper
-        run: .\Il2CppDumper\Il2CppDumper.exe .\temp\GameAssembly.dll .\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+        run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
         shell: pwsh
 
       - name: Run protodec
