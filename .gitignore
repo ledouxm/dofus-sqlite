@@ -13,3 +13,6 @@ output
 .env
 temp/
 json/
+dump.cs
+DummyDll
+dofus.proto
