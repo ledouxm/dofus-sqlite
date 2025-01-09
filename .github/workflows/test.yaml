@@ -34,8 +34,8 @@ jobs:
       - name: Set permissions
         run: |
           icacls ".\Il2CppDumper\Il2CppDumper.exe" /grant Everyone:F
-          icacls ".\parser\temp\GameAssembly.dll" /grant Everyone:F
-          icacls ".\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat" /grant Everyone:F
+          icacls ".\temp\GameAssembly.dll" /grant Everyone:F
+          icacls ".\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat" /grant Everyone:F
 
       - name: Check environment
         run: |
@@ -43,7 +43,7 @@ jobs:
           [Environment]::Is64BitProcess
 
       - name: Run Il2CppDumper
-        run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+        run: .\Il2CppDumper\Il2CppDumper.exe .\temp\GameAssembly.dll .\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
         shell: pwsh
 
       - name: Run protodec
