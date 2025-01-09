@@ -18,7 +18,7 @@ jobs:
 
       - name: Get current version
         id: version
-        run: Write-Output "version-$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
+        run: Write-Output "version-$(npx cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
 
       - name: echo version
         run: echo "${{ steps.version.outputs.version }}"
