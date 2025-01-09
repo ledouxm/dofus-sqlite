@@ -14,33 +14,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache workflow state
-        id: cache-state
-        uses: actions/cache@v3
-        with:
-          path: |
-            parser/temp
-            Il2CppDumper/DummyDll
-          key: ${{ runner.os }}-workflow-state-${{ hashFiles('parser/temp/**', 'Il2CppDumper/DummyDll/**') }}
-          save-on-error: true
-
-      - name: Setup and download (if cache miss)
-        if: steps.cache-state.outputs.cache-hit != 'true'
+      - name: Install cytrus-v6 and download
         run: |
-          dotnet --version
           npm i -g cytrus-v6@0.1.1
           cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/GameAssembly.dll --select **/global-metadata.dat
 
-      - name: Set permissions
-        run: |
-          icacls ".\Il2CppDumper\Il2CppDumper.exe" /grant Everyone:F
-          icacls ".\temp\GameAssembly.dll" /grant Everyone:F
-          icacls ".\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat" /grant Everyone:F
+      # - name: Set permissions
+      #   run: |
+      #     icacls ".\Il2CppDumper\Il2CppDumper.exe" /grant Everyone:F
+      #     icacls ".\temp\GameAssembly.dll" /grant Everyone:F
+      #     icacls ".\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat" /grant Everyone:F
 
-      - name: Check environment
-        run: |
-          [Environment]::Is64BitOperatingSystem
-          [Environment]::Is64BitProcess
+      # - name: Check environment
+      #   run: |
+      #     [Environment]::Is64BitOperatingSystem
+      #     [Environment]::Is64BitProcess
 
       - name: Run Il2CppDumper
         run: .\Il2CppDumper\Il2CppDumper.exe .\temp\GameAssembly.dll .\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
