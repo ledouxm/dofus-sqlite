@@ -31,10 +31,19 @@ jobs:
           npm i -g cytrus-v6@0.1.1
           cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/GameAssembly.dll --select **/global-metadata.dat
 
-      - name: Run Il2CppDumper
+      - name: Set permissions
         run: |
-          cd Il2CppDumper
-          .\Il2CppDumper.exe ..\parser\temp\GameAssembly.dll ..\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+          icacls ".\Il2CppDumper\Il2CppDumper.exe" /grant Everyone:F
+          icacls ".\parser\temp\GameAssembly.dll" /grant Everyone:F
+          icacls ".\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat" /grant Everyone:F
+
+      - name: Check environment
+        run: |
+          [Environment]::Is64BitOperatingSystem
+          [Environment]::Is64BitProcess
+
+      - name: Run Il2CppDumper
+        run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
         shell: pwsh
 
       - name: Run protodec
