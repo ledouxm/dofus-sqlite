@@ -7,123 +7,15 @@ on:
         required: false
         type: string
 
-  schedule:
-    - cron: "0 * * * *"
-
-permissions:
-  contents: write
-
-jobs:
-  check-version:
-    name: Check Game Version
-    runs-on: ubuntu-latest
-    outputs:
-      current_version: ${{ steps.version.outputs.version }}
-      should_release: ${{ steps.check.outputs.should_release }}
-      release_tag: ${{ steps.tag.outputs.tag }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install cytrus-v6
-        run: npm i -g cytrus-v6@0.1.1
-
-      - name: Get current version
-        id: version
-        run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
-
-      - name: Get latest release
-        id: latest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          latest_version=$(gh release list --exclude-pre-releases -L 1 | cut -f 3 | sed 's/^v//')
-          echo "version=${latest_version}" >> $GITHUB_OUTPUT
-
-      - name: Determine release tag
-        id: tag
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_tag }}" ]; then
-            echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check if should release
-        id: check
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "should_release=true" >> $GITHUB_OUTPUT
-          elif [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
-            echo "should_release=true" >> $GITHUB_OUTPUT
-          else
-            echo "should_release=false" >> $GITHUB_OUTPUT
-          fi
-
   process-and-update:
     needs: check-version
-    if: needs.check-version.outputs.should_release == 'true'
+    # if: needs.check-version.outputs.should_release == 'true'
     name: Extract and Process Game Data
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Cache npm global and pnpm dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ env.APPDATA }}\npm-cache 
-            ${{ env.HOME }}/.npm 
-            parser/node_modules
-            ${{ github.workspace }}/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('parser/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Install cytrus-v6
-        run: npm i -g cytrus-v6
-
-      - name: Install dependencies
-        working-directory: ./parser
-        run: pnpm install --frozen-lockfile
-
-      - name: Extract data with cytrus
-        working-directory: ./parser
-        run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle --select **/StreamingAssets/Content/I18n/*.bin --select **/GameAssembly.dll --select **/global-metadata.dat
-
-      - name: Parse files to JSON
-        working-directory: ./parser
-        run: pnpm extract
-        env:
-          INPUT_FOLDER: temp/
-          OUTPUT_FOLDER: json/
-
-      - name: Update database
-        working-directory: ./parser
-        run: pnpm db
-        env:
-          DATABASE_URL: ./dofus.sqlite
-          JSON_FOLDER: json/
-
-      - name: Run Il2CppDumper
-        run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
-        shell: pwsh
-
-      - name: Run protodec
-        run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
 
       - name: Create Release
         env:
