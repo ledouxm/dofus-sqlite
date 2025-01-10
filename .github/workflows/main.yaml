@@ -137,11 +137,18 @@ jobs:
             is_prerelease="--prerelease"
           fi
 
+<<<<<<< Updated upstream
           gh release create v${{ needs.check-version.outputs.release_tag }} \
             --title "Release ${{ needs.check-version.outputs.release_tag }}" \
             --notes "[Here is a quick link to dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
             
             Release contains:
+=======
+          $notes = @"
+          Quick links:
+            - [dofus.sqlite(https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)]
+            - [dofus.proto(https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.proto)]
+>>>>>>> Stashed changes
 
             - dofus.sqlite database file
             - i18n files
