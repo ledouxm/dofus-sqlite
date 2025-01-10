@@ -25,9 +25,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $isPrerelease = ""
-          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-              $isPrerelease = "--prerelease"
-          }
 
           $notes = "Quick links:`n"
           $notes += "  - [dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)`n"
