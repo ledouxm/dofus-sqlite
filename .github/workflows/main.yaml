@@ -129,9 +129,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $isPrerelease = ""
+          $isPrerelease = $false
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-              $isPrerelease = "--prerelease"
+              $isPrerelease = $true
           }
 
           $notes = "Quick links:`n"
@@ -144,7 +144,7 @@ jobs:
           $notes += "- Dofus obfuscated proto file`n`n"
           $notes += "This release is auto-generated."
 
-          gh release create "v${{ needs.check-version.outputs.release_tag }}" --title "Release ${{ needs.check-version.outputs.release_tag }}" --notes "$notes" --draft=false $isPrerelease
+          gh release create "v${{ needs.check-version.outputs.release_tag }}" --title "Release ${{ needs.check-version.outputs.release_tag }}" --notes "$notes" --draft=false $(if ($isPrerelease) {"--prerelease"})
 
       - name: Upload Release Assets
         env:
