@@ -134,20 +134,15 @@ jobs:
               $isPrerelease = "--prerelease"
           }
 
-          $notes = @"
-          Quick links:
-            - [dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)
-            - [dofus.proto](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.proto)
-
-          Release contains:
-
-          - dofus.sqlite database file
-          - i18n files
-          - Dofus 3 data files (quests, achievements, mapPositions, )
-          - Dofus obfuscated proto file
-
-          This release is auto-generated.
-          "@
+          $notes = "Quick links:`n"
+          $notes += "  - [dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.sqlite)`n"
+          $notes += "  - [dofus.proto](https://github.com/ledouxm/dofus-sqlite/releases/download/v${{ needs.check-version.outputs.release_tag }}/dofus.proto)`n`n"
+          $notes += "Release contains:`n`n"
+          $notes += "- dofus.sqlite database file`n"
+          $notes += "- i18n files`n"
+          $notes += "- Dofus 3 data files (quests, achievements, mapPositions, )`n"
+          $notes += "- Dofus obfuscated proto file`n`n"
+          $notes += "This release is auto-generated."
 
           gh release create "v${{ needs.check-version.outputs.release_tag }}" --title "Release ${{ needs.check-version.outputs.release_tag }}" --notes "$notes" --draft=false $isPrerelease
 
