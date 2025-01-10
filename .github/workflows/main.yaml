@@ -7,8 +7,8 @@ on:
         required: false
         type: string
 
+jobs:
   process-and-update:
-    needs: check-version
     # if: needs.check-version.outputs.should_release == 'true'
     name: Extract and Process Game Data
     runs-on: windows-latest
