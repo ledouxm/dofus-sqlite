@@ -1,7 +1,7 @@
 Dofus
 Dofus-beta
 Dofus-dofus3
-Dofus-dofus3 - Copie
+Dofus-dofus3-copie
 Retro
 *.sqlite
 *-wal
@@ -16,3 +16,8 @@ json/
 dump.cs
 DummyDll
 dofus.proto
+old
+Il2CppDumper/*
+!Il2CppDumper/Il2CppDumper*
+!Il2CppDumper/config.json
+!Il2CppDumper/protodec.exe

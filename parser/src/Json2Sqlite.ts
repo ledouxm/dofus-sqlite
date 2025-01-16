@@ -216,7 +216,9 @@ async function insertData(
       if (data[fieldName] && isArrayField(data[fieldName])) {
         const stmt = db.prepare(statements.junctionInserts[fieldName]);
         data[fieldName].Array.forEach((targetId: any) => {
-          stmt.run(recordId, targetId);
+          try {
+            stmt.run(recordId, targetId);
+          } catch (e) {}
         });
       }
     }
@@ -260,8 +262,14 @@ export async function createDatabaseFromJson(
     }
 
     // Third pass: insert data
+    let cpt = 0;
     for (const [className, refs] of groupedData) {
+      console.log("Inserting", refs.length, "records for", className);
       for (const ref of refs) {
+        if (className === "Item") {
+          cpt++;
+        }
+
         await insertData(db, className, schemas[className], ref.data);
       }
     }
@@ -271,6 +279,7 @@ export async function createDatabaseFromJson(
       schemas,
     };
   } catch (error) {
+    console.log(error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
