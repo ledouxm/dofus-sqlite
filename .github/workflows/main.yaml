@@ -31,6 +31,11 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Setup dotnetv7
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "7"
+
       - name: Install cytrus-v6
         run: npm i -g cytrus-v6@0.1.1
 
