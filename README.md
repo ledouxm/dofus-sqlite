@@ -42,6 +42,7 @@ const potionRecipes = await db
   .innerJoin("Recipes", "Recipes.resultId", "Items.id")
   .innerJoin("translations", "Items.nameId", "translations.id")
   .where("translations.value", "like", "%potion%")
+  .where("translations.lang", "=", "fr")
   .select(["translations.value as name"])
   .selectAll(["Recipes"])
   .execute();
