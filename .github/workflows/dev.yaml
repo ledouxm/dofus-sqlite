@@ -1,4 +1,4 @@
-name: Check version and extract data
+name: Devevelopment release
 on:
     push:
         branches:
