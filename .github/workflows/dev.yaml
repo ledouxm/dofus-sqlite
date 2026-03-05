@@ -4,6 +4,13 @@ on:
         branches:
             - development
 
+    workflow_dispatch:
+        inputs:
+            release_tag:
+                description: "Release tag suffix"
+                required: false
+                type: string
+
     # schedule:
     #   - cron: "0 * * * *"
 
