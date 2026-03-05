@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("unity-bundle-unwrap")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+786341562623801375066708d28922722ad4f2ac")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed8d885f281d7ded8fc757bf27e0ebc8cd98c395")]
 [assembly: System.Reflection.AssemblyProductAttribute("unity-bundle-unwrap")]
 [assembly: System.Reflection.AssemblyTitleAttribute("unity-bundle-unwrap")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
