@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "Il2CppDumper/6.7.40": {
+      "Il2CppDumper/1.0.0.0": {
         "dependencies": {
           "Mono.Cecil": "0.11.4"
         },
@@ -37,7 +37,7 @@
     }
   },
   "libraries": {
-    "Il2CppDumper/6.7.40": {
+    "Il2CppDumper/1.0.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
