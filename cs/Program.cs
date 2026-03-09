@@ -182,15 +182,41 @@ public class DodudaBundleUnpack
         }
         outDir = Path.GetFullPath(outDir);
 
-        var bundle = LoadBundleFile(InBundlePath);
-        if (bundle == null)
+        var manager = new AssetsManager();
+        var bunInst = manager.LoadBundleFile(InBundlePath, true);
+        var afileInst = manager.LoadAssetsFileFromBundle(bunInst, 0, false);
+        var afile = afileInst.file;
+        var monos = afile.GetAssetsOfType(AssetClassID.MonoBehaviour);
+
+        if (monos.Count == 0)
         {
-            Console.WriteLine("Failed to load bundle file.");
+            Console.WriteLine("No MonoBehaviours found.");
             return;
         }
 
-        var json = RecurseJsonDump(bundle, false);
-
-        File.WriteAllText(OutJsonPath, json.ToString());
+        if (monos.Count == 1)
+        {
+            var field = manager.GetBaseField(afileInst, monos[0]);
+            if (field == null)
+            {
+                Console.WriteLine("Failed to load bundle file.");
+                return;
+            }
+            var json = RecurseJsonDump(field, false);
+            File.WriteAllText(OutJsonPath, json.ToString());
+        }
+        else
+        {
+            // Multiple MonoBehaviours (e.g. map bundles): output raw bytes as base64 array
+            var reader = afileInst.file.Reader;
+            var rawArray = new JArray();
+            foreach (var mono in monos)
+            {
+                reader.Position = mono.GetAbsoluteByteOffset(afileInst.file);
+                var rawBytes = reader.ReadBytes((int)mono.ByteSize);
+                rawArray.Add(Convert.ToBase64String(rawBytes));
+            }
+            File.WriteAllText(OutJsonPath, rawArray.ToString());
+        }
     }
 }
