@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import { exec } from "child_process";
 import { createFoldersRecursively } from "./utils";
 import { parseTranslations, readSingleTranslation } from "./parseTranslations";
+import sqlite from "better-sqlite3";
 
 dotenv.config();
 
@@ -97,47 +98,64 @@ const parseMapBundles = async () => {
 
   console.log(`### PARSING ${mapBundles.length} MAP DATA BUNDLES`);
 
-  const tempDir = path.join(OUTPUT_FOLDER, ".mapdata_temp");
-  await createFoldersRecursively(tempDir);
+  const MAP_INTERACTIONS_DB = process.env.MAP_INTERACTIONS_DB ?? "map_interactions.sqlite";
+  try { await fs.unlink(MAP_INTERACTIONS_DB); } catch {}
+  const mapDb = new sqlite(MAP_INTERACTIONS_DB);
+  mapDb.exec("PRAGMA journal_mode = WAL");
+  mapDb.exec(`
+    CREATE TABLE map_interactions (
+      mapId         INTEGER,
+      worldId       INTEGER,
+      gfxId         INTEGER,
+      cellId        INTEGER,
+      interactionId INTEGER
+    )
+  `);
+  const insert = mapDb.prepare(
+    "INSERT INTO map_interactions VALUES (@mapId, @worldId, @gfxId, @cellId, @interactionId)",
+  );
 
-  const allRefIds: any[] = [];
-  let mergedVersion: number | undefined;
+  let totalInserted = 0;
 
   for (const file of mapBundles) {
-    console.log("parsing map bundle", file);
-    const tempFile = path.join(tempDir, `${file}.json`);
+    const worldMatch = file.match(/(\d+)/);
+    const worldId = worldMatch ? parseInt(worldMatch[1]) : null;
+    console.log(`parsing map bundle ${file} (world ${worldId})`);
 
+    const outputFile = path.join(OUTPUT_FOLDER, `mapdata_world_${worldId}.json`);
     await parseBundleFile({
       inputFile: path.join(mapDataDir, file),
-      outputFile: tempFile,
+      outputFile,
     });
 
-    const content = JSON.parse(await fs.readFile(tempFile, "utf-8"));
-    if (content.references?.RefIds) {
-      if (mergedVersion === undefined) {
-        mergedVersion = content.references.version;
+    const content = JSON.parse(await fs.readFile(outputFile, "utf-8"));
+    const refIds: any[] = content.references?.RefIds ?? [];
+    const monoRefs: { name: string; start: number; end: number }[] = content.monoRefs ?? [];
+
+    mapDb.transaction(() => {
+      for (const monoRef of monoRefs) {
+        const mapIdMatch = monoRef.name?.match(/(\d+)/);
+        const mapId = mapIdMatch ? parseInt(mapIdMatch[1]) : null;
+
+        for (let i = monoRef.start; i < monoRef.end; i++) {
+          const ref = refIds[i];
+          if (ref?.type?.class === "ClientInteractiveAnimatedElementTransform" && ref.data) {
+            insert.run({
+              mapId,
+              worldId,
+              gfxId: ref.data.gfxId,
+              cellId: ref.data.cellId,
+              interactionId: ref.data.m_interactionId,
+            });
+            totalInserted++;
+          }
+        }
       }
-      allRefIds.push(...content.references.RefIds);
-    }
+    })();
   }
 
-  const mergedJson = {
-    references: {
-      version: mergedVersion ?? 1,
-      RefIds: allRefIds,
-    },
-  };
-
-  await fs.writeFile(
-    path.join(OUTPUT_FOLDER, "mapdata.json"),
-    JSON.stringify(mergedJson),
-  );
-
-  console.log(
-    `Merged ${allRefIds.length} map entries into mapdata.json`,
-  );
-
-  await fs.rm(tempDir, { recursive: true, force: true });
+  mapDb.close();
+  console.log(`Wrote ${totalInserted} rows to ${MAP_INTERACTIONS_DB}`);
 };
 
 const PREFIX = "data_assets_";

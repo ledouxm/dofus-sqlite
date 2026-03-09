@@ -207,16 +207,41 @@ public class DodudaBundleUnpack
         }
         else
         {
-            // Multiple MonoBehaviours (e.g. map bundles): output raw bytes as base64 array
-            var reader = afileInst.file.Reader;
-            var rawArray = new JArray();
+            // Multiple MonoBehaviours (e.g. map bundles): merge all RefIds + track per-mono ranges
+            var mergedRefIds = new JArray();
+            var monoRefs = new JArray();
+            int refVersion = 1;
             foreach (var mono in monos)
             {
-                reader.Position = mono.GetAbsoluteByteOffset(afileInst.file);
-                var rawBytes = reader.ReadBytes((int)mono.ByteSize);
-                rawArray.Add(Convert.ToBase64String(rawBytes));
+                var field = manager.GetBaseField(afileInst, mono);
+                if (field == null) continue;
+                var monoJson = RecurseJsonDump(field, false) as JObject;
+                if (monoJson == null) continue;
+                var refs = monoJson["references"] as JObject;
+                if (refs == null) continue;
+                refVersion = refs["version"]?.Value<int>() ?? refVersion;
+                var refIds = refs["RefIds"] as JArray;
+                if (refIds == null) continue;
+                int start = mergedRefIds.Count;
+                foreach (var refId in refIds)
+                    mergedRefIds.Add(refId);
+                monoRefs.Add(new JObject
+                {
+                    ["name"] = monoJson["m_Name"]?.Value<string>() ?? "",
+                    ["start"] = start,
+                    ["end"] = mergedRefIds.Count
+                });
             }
-            File.WriteAllText(OutJsonPath, rawArray.ToString());
+            var result = new JObject
+            {
+                ["references"] = new JObject
+                {
+                    ["version"] = refVersion,
+                    ["RefIds"] = mergedRefIds
+                },
+                ["monoRefs"] = monoRefs
+            };
+            File.WriteAllText(OutJsonPath, result.ToString(Newtonsoft.Json.Formatting.None));
         }
     }
 }
