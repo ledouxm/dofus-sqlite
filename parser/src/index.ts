@@ -71,6 +71,73 @@ const main = async () => {
       );
     }
   }
+
+  await parseMapBundles();
+};
+
+const parseMapBundles = async () => {
+  const mapDataDir = path.join(INPUT_FOLDER, "Map", "Data");
+
+  let files: string[];
+  try {
+    files = await fs.readdir(mapDataDir);
+  } catch {
+    console.log("No Map/Data folder found, skipping map bundle parsing.");
+    return;
+  }
+
+  const mapBundles = files.filter((f) =>
+    /^mapdata_assets_world_\d+\.bundle$/.test(f),
+  );
+
+  if (mapBundles.length === 0) {
+    console.log("No map data bundles found, skipping.");
+    return;
+  }
+
+  console.log(`### PARSING ${mapBundles.length} MAP DATA BUNDLES`);
+
+  const tempDir = path.join(OUTPUT_FOLDER, ".mapdata_temp");
+  await createFoldersRecursively(tempDir);
+
+  const allRefIds: any[] = [];
+  let mergedVersion: number | undefined;
+
+  for (const file of mapBundles) {
+    console.log("parsing map bundle", file);
+    const tempFile = path.join(tempDir, `${file}.json`);
+
+    await parseBundleFile({
+      inputFile: path.join(mapDataDir, file),
+      outputFile: tempFile,
+    });
+
+    const content = JSON.parse(await fs.readFile(tempFile, "utf-8"));
+    if (content.references?.RefIds) {
+      if (mergedVersion === undefined) {
+        mergedVersion = content.references.version;
+      }
+      allRefIds.push(...content.references.RefIds);
+    }
+  }
+
+  const mergedJson = {
+    references: {
+      version: mergedVersion ?? 1,
+      RefIds: allRefIds,
+    },
+  };
+
+  await fs.writeFile(
+    path.join(OUTPUT_FOLDER, "mapdata.json"),
+    JSON.stringify(mergedJson),
+  );
+
+  console.log(
+    `Merged ${allRefIds.length} map entries into mapdata.json`,
+  );
+
+  await fs.rm(tempDir, { recursive: true, force: true });
 };
 
 const PREFIX = "data_assets_";
