@@ -10,6 +10,26 @@ on:
                 description: "Release tag suffix"
                 required: false
                 type: string
+            skip_download:
+                description: "Skip cytrus download"
+                required: false
+                type: boolean
+                default: false
+            skip_parse:
+                description: "Skip JSON parsing"
+                required: false
+                type: boolean
+                default: false
+            skip_database:
+                description: "Skip database update"
+                required: false
+                type: boolean
+                default: false
+            skip_proto:
+                description: "Skip Il2CppDumper + protodec"
+                required: false
+                type: boolean
+                default: false
 
     # schedule:
     #   - cron: "0 * * * *"
@@ -23,7 +43,6 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             current_version: ${{ steps.version.outputs.version }}
-            should_release: ${{ steps.check.outputs.should_release }}
             release_tag: ${{ steps.tag.outputs.tag }}
 
         steps:
@@ -45,26 +64,15 @@ jobs:
             - name: Determine release tag
               id: tag
               run: |
+                  TIMESTAMP=$(date +%Y%m%d%H%M%S)
                   if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_tag }}" ]; then
-                    echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}-dev" >> $GITHUB_OUTPUT
+                    echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}-dev-$TIMESTAMP" >> $GITHUB_OUTPUT
                   else
-                    echo "tag=${{ steps.version.outputs.version }}-dev" >> $GITHUB_OUTPUT
-                  fi
-
-            - name: Check if should release
-              id: check
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  if gh release view "v${{ steps.tag.outputs.tag }}" > /dev/null 2>&1; then
-                    echo "should_release=false" >> $GITHUB_OUTPUT
-                  else
-                    echo "should_release=true" >> $GITHUB_OUTPUT
+                    echo "tag=${{ steps.version.outputs.version }}-dev-$TIMESTAMP" >> $GITHUB_OUTPUT
                   fi
 
     process-and-update:
         needs: check-version
-        if: needs.check-version.outputs.should_release == 'true'
         name: Extract and Process Game Data
         runs-on: windows-latest
 
@@ -86,8 +94,8 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: |
-                      ${{ env.APPDATA }}\npm-cache 
-                      ${{ env.HOME }}/.npm 
+                      ${{ env.APPDATA }}\npm-cache
+                      ${{ env.HOME }}/.npm
                       parser/node_modules
                       ${{ github.workspace }}/.pnpm-store
                   key: ${{ runner.os }}-pnpm-${{ hashFiles('parser/pnpm-lock.yaml') }}
@@ -102,10 +110,12 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Extract data with cytrus
+              if: inputs.skip_download != true
               working-directory: ./parser
               run: cytrus-v6 download --game dofus --release dofus3 --output temp/ --select **/StreamingAssets/Content/Data/**/*.bundle --select **/StreamingAssets/Content/I18n/*.bin --select **/StreamingAssets/Content/Map/Data/**/*.bundle --select **/GameAssembly.dll --select **/global-metadata.dat
 
             - name: Parse files to JSON
+              if: inputs.skip_parse != true
               working-directory: ./parser
               run: pnpm extract
               env:
@@ -113,6 +123,7 @@ jobs:
                   OUTPUT_FOLDER: json/
 
             - name: Update database
+              if: inputs.skip_database != true
               working-directory: ./parser
               run: pnpm db
               env:
@@ -120,10 +131,12 @@ jobs:
                   JSON_FOLDER: json/
 
             - name: Run Il2CppDumper
+              if: inputs.skip_proto != true
               run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
               shell: pwsh
 
             - name: Run protodec
+              if: inputs.skip_proto != true
               run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
 
             - name: Create Release
