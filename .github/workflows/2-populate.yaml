@@ -1,0 +1,200 @@
+name: 2 - Populate Release
+on:
+    workflow_run:
+        workflows: ["1 - Check Version and Create Pre-release"]
+        types:
+            - completed
+
+    workflow_dispatch:
+        inputs:
+            release_tag:
+                description: "Pre-release tag to populate (e.g. 2.75.0-dev-20240101120000)"
+                required: true
+                type: string
+
+permissions:
+    contents: write
+    actions: read
+
+jobs:
+    setup:
+        name: Install Dependencies
+        runs-on: windows-latest
+        if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+        outputs:
+            release_tag: ${{ steps.tag.outputs.release_tag }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download release tag artifact
+              if: github.event_name == 'workflow_run'
+              uses: actions/download-artifact@v4
+              with:
+                  name: release-tag
+                  run-id: ${{ github.event.workflow_run.id }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Set release tag
+              id: tag
+              shell: bash
+              run: |
+                  if [ "${{ github.event_name }}" = "workflow_run" ]; then
+                    echo "release_tag=$(cat tag.txt)" >> $GITHUB_OUTPUT
+                  else
+                    echo "release_tag=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                  dotnet-version: "7"
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 10.12.4
+
+            - name: Cache dependencies
+              id: cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      parser/node_modules
+                      ${{ env.APPDATA }}\npm
+                  key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-deps-
+
+            - name: Install cytrus-v6
+              if: steps.cache.outputs.cache-hit != 'true'
+              run: npm i -g cytrus-v6
+
+            - name: Install parser dependencies
+              if: steps.cache.outputs.cache-hit != 'true'
+              working-directory: ./parser
+              run: pnpm install --no-frozen-lockfile
+
+    populate-data:
+        name: Extract and Upload Data
+        needs: setup
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                  dotnet-version: "7"
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 10.12.4
+
+            - name: Restore cached dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      parser/node_modules
+                      ${{ env.APPDATA }}\npm
+                  key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-deps-
+
+            - name: Extract data with cytrus (no map bundles)
+              working-directory: ./parser
+              run: >
+                  cytrus-v6 download --game dofus --release dofus3 --output temp/
+                  --select **/StreamingAssets/Content/Data/**/*.bundle
+                  --select **/StreamingAssets/Content/I18n/*.bin
+                  --select **/GameAssembly.dll
+                  --select **/global-metadata.dat
+
+            - name: Parse files to JSON
+              working-directory: ./parser
+              run: pnpm extract
+              env:
+                  INPUT_FOLDER: temp/
+                  OUTPUT_FOLDER: json/
+
+            - name: Update database
+              working-directory: ./parser
+              run: pnpm db
+              env:
+                  DATABASE_URL: ./dofus.sqlite
+                  JSON_FOLDER: json/
+
+            - name: Run Il2CppDumper
+              run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+              shell: pwsh
+
+            - name: Run protodec
+              run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
+
+            - name: Upload assets to pre-release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              shell: pwsh
+              run: |
+                  $tag = "v${{ needs.setup.outputs.release_tag }}"
+                  $files = Get-ChildItem -Path "parser/json" -File
+                  foreach ($file in $files) {
+                      gh release upload $tag $file.FullName
+                  }
+                  gh release upload $tag parser/dofus.sqlite
+                  gh release upload $tag parser/dofus.proto
+
+    populate-maps:
+        name: Extract and Upload Maps
+        needs: setup
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                  dotnet-version: "7"
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 10.12.4
+
+            - name: Restore cached dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      parser/node_modules
+                      ${{ env.APPDATA }}\npm
+                  key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-deps-
+
+            - name: Extract map bundles with cytrus
+              working-directory: ./parser
+              run: >
+                  cytrus-v6 download --game dofus --release dofus3 --output temp/
+                  --select **/StreamingAssets/Content/Map/Data/**/*.bundle
+
+            - name: Parse map bundles and create maps.sqlite
+              working-directory: ./parser
+              run: pnpm extract
+              env:
+                  INPUT_FOLDER: temp/
+                  OUTPUT_FOLDER: json/
+                  MAP_INTERACTIONS_DB: maps.sqlite
+
+            - name: Upload maps.sqlite to pre-release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              shell: pwsh
+              run: |
+                  $tag = "v${{ needs.setup.outputs.release_tag }}"
+                  gh release upload $tag parser/maps.sqlite
