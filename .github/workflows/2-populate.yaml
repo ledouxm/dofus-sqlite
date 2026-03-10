@@ -63,7 +63,7 @@ jobs:
             - name: Install parser dependencies
               if: steps.cache.outputs.cache-hit != 'true'
               working-directory: ./parser
-              run: pnpm install --no-frozen-lockfile
+              run: pnpm install --frozen-lockfile
 
             - name: Download data files
               run: >
