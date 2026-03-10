@@ -52,7 +52,7 @@ jobs:
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
-                  version: 8
+                  version: 10
 
             - name: Cache npm global and pnpm dependencies
               uses: actions/cache@v3
@@ -71,10 +71,7 @@ jobs:
 
             - name: Install dependencies
               working-directory: ./parser
-              run: |
-                  Remove-Item -Force pnpm-lock.yaml -ErrorAction SilentlyContinue
-                  pnpm install
-              shell: pwsh
+              run: pnpm install --frozen-lockfile
 
             - name: Extract data with cytrus (no map bundles)
               working-directory: ./parser
