@@ -71,7 +71,10 @@ jobs:
 
             - name: Install dependencies
               working-directory: ./parser
-              run: pnpm install --no-frozen-lockfile
+              run: |
+                  Remove-Item -Force pnpm-lock.yaml -ErrorAction SilentlyContinue
+                  pnpm install
+              shell: pwsh
 
             - name: Extract map bundles with cytrus
               working-directory: ./parser
