@@ -18,7 +18,7 @@ permissions:
 
 jobs:
     setup:
-        name: Install Dependencies
+        name: Install Dependencies and Download Game Files
         runs-on: windows-latest
         if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
         outputs:
@@ -46,11 +46,6 @@ jobs:
                     echo "release_tag=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
                   fi
 
-            - name: Setup .NET
-              uses: actions/setup-dotnet@v3
-              with:
-                  dotnet-version: "7"
-
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
@@ -60,21 +55,42 @@ jobs:
               id: cache
               uses: actions/cache@v4
               with:
-                  path: |
-                      parser/node_modules
-                      ${{ env.APPDATA }}\npm
+                  path: parser/node_modules
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
-
-            - name: Install cytrus-v6
-              if: steps.cache.outputs.cache-hit != 'true'
-              run: npm i -g cytrus-v6
 
             - name: Install parser dependencies
               if: steps.cache.outputs.cache-hit != 'true'
               working-directory: ./parser
               run: pnpm install --no-frozen-lockfile
+
+            - name: Download data files
+              run: >
+                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp/
+                  --select **/StreamingAssets/Content/Data/**/*.bundle
+                  --select **/StreamingAssets/Content/I18n/*.bin
+                  --select **/GameAssembly.dll
+                  --select **/global-metadata.dat
+
+            - name: Download map bundles
+              run: >
+                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-maps/
+                  --select **/StreamingAssets/Content/Map/Data/**/*.bundle
+
+            - name: Upload game-data artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: game-data
+                  path: parser/temp/
+                  retention-days: 1
+
+            - name: Upload map-bundles artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: map-bundles
+                  path: parser/temp-maps/
+                  retention-days: 1
 
     populate-data:
         name: Extract and Upload Data
@@ -85,11 +101,6 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
-            - name: Setup .NET
-              uses: actions/setup-dotnet@v3
-              with:
-                  dotnet-version: "7"
-
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
@@ -98,21 +109,16 @@ jobs:
             - name: Restore cached dependencies
               uses: actions/cache@v4
               with:
-                  path: |
-                      parser/node_modules
-                      ${{ env.APPDATA }}\npm
+                  path: parser/node_modules
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
 
-            - name: Extract data with cytrus (no map bundles)
-              working-directory: ./parser
-              run: >
-                  cytrus-v6 download --game dofus --release dofus3 --output temp/
-                  --select **/StreamingAssets/Content/Data/**/*.bundle
-                  --select **/StreamingAssets/Content/I18n/*.bin
-                  --select **/GameAssembly.dll
-                  --select **/global-metadata.dat
+            - name: Download game-data artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: game-data
+                  path: parser/temp/
 
             - name: Parse files to JSON
               working-directory: ./parser
@@ -128,13 +134,6 @@ jobs:
                   DATABASE_URL: ./dofus.sqlite
                   JSON_FOLDER: json/
 
-            - name: Run Il2CppDumper
-              run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
-              shell: pwsh
-
-            - name: Run protodec
-              run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
-
             - name: Upload assets to pre-release
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -146,10 +145,9 @@ jobs:
                       gh release upload $tag $file.FullName
                   }
                   gh release upload $tag parser/dofus.sqlite
-                  gh release upload $tag parser/dofus.proto
 
-    populate-maps:
-        name: Extract and Upload Maps
+    il2cpp-proto:
+        name: Generate Proto
         needs: setup
         runs-on: windows-latest
 
@@ -162,6 +160,33 @@ jobs:
               with:
                   dotnet-version: "7"
 
+            - name: Download game-data artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: game-data
+                  path: parser/temp/
+
+            - name: Run Il2CppDumper
+              shell: pwsh
+              run: .\Il2CppDumper\Il2CppDumper.exe .\parser\temp\GameAssembly.dll .\parser\temp\Dofus_Data\il2cpp_data\Metadata\global-metadata.dat
+
+            - name: Run protodec
+              run: .\Il2CppDumper\protodec.exe .\Il2CppDumper\DummyDll .\parser\dofus.proto --include-properties-without-non-user-code-attribute
+
+            - name: Upload proto to pre-release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh release upload "v${{ needs.setup.outputs.release_tag }}" parser/dofus.proto
+
+    populate-maps:
+        name: Extract and Upload Maps
+        needs: setup
+        runs-on: windows-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
@@ -170,18 +195,16 @@ jobs:
             - name: Restore cached dependencies
               uses: actions/cache@v4
               with:
-                  path: |
-                      parser/node_modules
-                      ${{ env.APPDATA }}\npm
+                  path: parser/node_modules
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
 
-            - name: Extract map bundles with cytrus
-              working-directory: ./parser
-              run: >
-                  cytrus-v6 download --game dofus --release dofus3 --output temp/
-                  --select **/StreamingAssets/Content/Map/Data/**/*.bundle
+            - name: Download map-bundles artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: map-bundles
+                  path: parser/temp/
 
             - name: Parse map bundles and create maps.sqlite
               working-directory: ./parser
