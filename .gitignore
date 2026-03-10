@@ -13,6 +13,9 @@ output
 .env
 temp/
 json/
+.mapdata_temp/
+cs/bin
+cs/obj
 dump.cs
 DummyDll
 dofus.proto

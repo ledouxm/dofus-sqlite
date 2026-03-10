@@ -182,15 +182,66 @@ public class DodudaBundleUnpack
         }
         outDir = Path.GetFullPath(outDir);
 
-        var bundle = LoadBundleFile(InBundlePath);
-        if (bundle == null)
+        var manager = new AssetsManager();
+        var bunInst = manager.LoadBundleFile(InBundlePath, true);
+        var afileInst = manager.LoadAssetsFileFromBundle(bunInst, 0, false);
+        var afile = afileInst.file;
+        var monos = afile.GetAssetsOfType(AssetClassID.MonoBehaviour);
+
+        if (monos.Count == 0)
         {
-            Console.WriteLine("Failed to load bundle file.");
+            Console.WriteLine("No MonoBehaviours found.");
             return;
         }
 
-        var json = RecurseJsonDump(bundle, false);
-
-        File.WriteAllText(OutJsonPath, json.ToString());
+        if (monos.Count == 1)
+        {
+            var field = manager.GetBaseField(afileInst, monos[0]);
+            if (field == null)
+            {
+                Console.WriteLine("Failed to load bundle file.");
+                return;
+            }
+            var json = RecurseJsonDump(field, false);
+            File.WriteAllText(OutJsonPath, json.ToString());
+        }
+        else
+        {
+            // Multiple MonoBehaviours (e.g. map bundles): merge all RefIds + track per-mono ranges
+            var mergedRefIds = new JArray();
+            var monoRefs = new JArray();
+            int refVersion = 1;
+            foreach (var mono in monos)
+            {
+                var field = manager.GetBaseField(afileInst, mono);
+                if (field == null) continue;
+                var monoJson = RecurseJsonDump(field, false) as JObject;
+                if (monoJson == null) continue;
+                var refs = monoJson["references"] as JObject;
+                if (refs == null) continue;
+                refVersion = refs["version"]?.Value<int>() ?? refVersion;
+                var refIds = refs["RefIds"] as JArray;
+                if (refIds == null) continue;
+                int start = mergedRefIds.Count;
+                foreach (var refId in refIds)
+                    mergedRefIds.Add(refId);
+                monoRefs.Add(new JObject
+                {
+                    ["name"] = monoJson["m_Name"]?.Value<string>() ?? "",
+                    ["start"] = start,
+                    ["end"] = mergedRefIds.Count
+                });
+            }
+            var result = new JObject
+            {
+                ["references"] = new JObject
+                {
+                    ["version"] = refVersion,
+                    ["RefIds"] = mergedRefIds
+                },
+                ["monoRefs"] = monoRefs
+            };
+            File.WriteAllText(OutJsonPath, result.ToString(Newtonsoft.Json.Formatting.None));
+        }
     }
 }
