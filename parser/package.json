@@ -1,33 +1,38 @@
 {
-  "name": "dofus-sqlite",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "extract:dev": "vite-node --watch ./src/index.ts",
-    "extract": "vite-node ./src/index.ts",
-    "db:dev": "vite-node --watch ./src/generateDb.ts",
-    "db": "vite-node ./src/generateDb.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^22.10.5",
-    "typescript": "^5.7.2",
-    "vite-node": "^2.1.8"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3", "esbuild"],
-    "ignoredBuiltDependencies": ["cpu-features", "protobufjs", "ssh2"]
-  },
-  "dependencies": {
-    "axios": "^1.7.9",
-    "better-sqlite3": "^11.7.0",
-    "dotenv": "^16.4.7",
-    "testcontainers": "^10.16.0",
-    "uuid": "^11.0.3"
-  }
+    "name": "dofus-sqlite",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "extract:dev": "vite-node --watch ./src/index.ts",
+        "extract": "vite-node ./src/index.ts",
+        "db:dev": "vite-node --watch ./src/generateDb.ts",
+        "db": "vite-node ./src/generateDb.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/better-sqlite3": "^7.6.12",
+        "@types/node": "^22.10.5",
+        "typescript": "^5.7.2",
+        "vite-node": "^2.1.8"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "better-sqlite3",
+            "cpu-features",
+            "esbuild",
+            "protobufjs",
+            "ssh2"
+        ]
+    },
+    "dependencies": {
+        "axios": "^1.7.9",
+        "better-sqlite3": "^11.7.0",
+        "dotenv": "^16.4.7",
+        "testcontainers": "^10.16.0",
+        "uuid": "^11.0.3"
+    }
 }
