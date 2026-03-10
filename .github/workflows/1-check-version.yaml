@@ -1,0 +1,141 @@
+name: 1 - Check Version and Create Pre-release
+on:
+    push:
+        branches:
+            - development
+
+    workflow_dispatch:
+        inputs:
+            release_tag:
+                description: "Custom tag suffix for the release"
+                required: false
+                type: string
+
+    schedule:
+        - cron: "0 * * * *"
+
+permissions:
+    contents: write
+
+jobs:
+    check-version:
+        name: Check Game Version
+        runs-on: ubuntu-latest
+        outputs:
+            current_version: ${{ steps.version.outputs.version }}
+            should_release: ${{ steps.check.outputs.should_release }}
+            release_tag: ${{ steps.tag.outputs.tag }}
+            is_dev: ${{ steps.check.outputs.is_dev }}
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install cytrus-v6
+              run: npm i -g cytrus-v6@0.1.1
+
+            - name: Get current version
+              id: version
+              run: echo "version=$(cytrus-v6 version --game dofus --release dofus3)" >> $GITHUB_OUTPUT
+
+            - name: Get latest release
+              id: latest
+              if: github.event_name != 'push'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  latest_version=$(gh release list --exclude-pre-releases -L 1 | cut -f 3 | sed 's/^v//')
+                  echo "version=${latest_version}" >> $GITHUB_OUTPUT
+
+            - name: Determine release tag
+              id: tag
+              run: |
+                  if [ "${{ github.event_name }}" = "push" ]; then
+                    TIMESTAMP=$(date +%Y%m%d%H%M%S)
+                    if [ -n "${{ inputs.release_tag }}" ]; then
+                      echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}-dev-$TIMESTAMP" >> $GITHUB_OUTPUT
+                    else
+                      echo "tag=${{ steps.version.outputs.version }}-dev-$TIMESTAMP" >> $GITHUB_OUTPUT
+                    fi
+                  elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.release_tag }}" ]; then
+                    echo "tag=${{ steps.version.outputs.version }}-${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+                  else
+                    echo "tag=${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if should release
+              id: check
+              run: |
+                  if [ "${{ github.event_name }}" = "push" ]; then
+                    echo "should_release=true" >> $GITHUB_OUTPUT
+                    echo "is_dev=true" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                    echo "should_release=true" >> $GITHUB_OUTPUT
+                    echo "is_dev=false" >> $GITHUB_OUTPUT
+                  elif [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
+                    echo "should_release=true" >> $GITHUB_OUTPUT
+                    echo "is_dev=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "should_release=false" >> $GITHUB_OUTPUT
+                    echo "is_dev=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Save release tag to artifact
+              if: steps.check.outputs.should_release == 'true'
+              run: |
+                  mkdir -p release-tag
+                  echo "${{ steps.tag.outputs.tag }}" > release-tag/tag.txt
+
+            - name: Upload release tag artifact
+              if: steps.check.outputs.should_release == 'true'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: release-tag
+                  path: release-tag/tag.txt
+                  retention-days: 1
+
+    create-prerelease:
+        name: Create Pre-release
+        needs: check-version
+        if: needs.check-version.outputs.should_release == 'true'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Create pre-release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  TAG="v${{ needs.check-version.outputs.release_tag }}"
+                  IS_DEV="${{ needs.check-version.outputs.is_dev }}"
+
+                  NOTES="Quick links:"$'\n'
+                  NOTES+="  - [dofus.sqlite](https://github.com/${{ github.repository }}/releases/download/${TAG}/dofus.sqlite)"$'\n'
+                  NOTES+="  - [dofus.proto](https://github.com/${{ github.repository }}/releases/download/${TAG}/dofus.proto)"$'\n'
+                  NOTES+="  - [maps.sqlite](https://github.com/${{ github.repository }}/releases/download/${TAG}/maps.sqlite)"$'\n'$'\n'
+                  NOTES+="Release contains:"$'\n'$'\n'
+                  NOTES+="- dofus.sqlite database file"$'\n'
+                  NOTES+="- maps.sqlite map interactions database"$'\n'
+                  NOTES+="- i18n files"$'\n'
+                  NOTES+="- Dofus 3 data files (quests, achievements, mapPositions, ...)"$'\n'
+                  NOTES+="- Dofus obfuscated proto file"$'\n'$'\n'
+                  NOTES+="This release is auto-generated."
+
+                  if [ "$IS_DEV" = "true" ]; then
+                    gh release create "$TAG" \
+                      --repo "${{ github.repository }}" \
+                      --title "Dev Release ${{ needs.check-version.outputs.release_tag }}" \
+                      --notes "$NOTES" \
+                      --prerelease \
+                      --draft
+                  else
+                    gh release create "$TAG" \
+                      --repo "${{ github.repository }}" \
+                      --title "Release ${{ needs.check-version.outputs.release_tag }}" \
+                      --notes "$NOTES" \
+                      --prerelease
+                  fi
