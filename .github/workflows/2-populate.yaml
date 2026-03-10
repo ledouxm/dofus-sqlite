@@ -105,6 +105,9 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-deps-
 
+            - name: Install cytrus-v6
+              run: npm i -g cytrus-v6
+
             - name: Extract data with cytrus (no map bundles)
               working-directory: ./parser
               run: >
@@ -176,6 +179,9 @@ jobs:
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
+
+            - name: Install cytrus-v6
+              run: npm i -g cytrus-v6
 
             - name: Extract map bundles with cytrus
               working-directory: ./parser
