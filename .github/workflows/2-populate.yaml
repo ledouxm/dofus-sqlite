@@ -60,16 +60,10 @@ jobs:
               id: cache
               uses: actions/cache@v4
               with:
-                  path: |
-                      parser/node_modules
-                      ${{ env.APPDATA }}\npm
+                  path: parser/node_modules
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
-
-            - name: Install cytrus-v6
-              if: steps.cache.outputs.cache-hit != 'true'
-              run: npm i -g cytrus-v6
 
             - name: Install parser dependencies
               if: steps.cache.outputs.cache-hit != 'true'
@@ -98,20 +92,15 @@ jobs:
             - name: Restore cached dependencies
               uses: actions/cache@v4
               with:
-                  path: |
-                      parser/node_modules
-                      ${{ env.APPDATA }}\npm
+                  path: parser/node_modules
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
 
-            - name: Install cytrus-v6
-              run: npm i -g cytrus-v6
-
             - name: Extract data with cytrus (no map bundles)
               working-directory: ./parser
               run: >
-                  cytrus-v6 download --game dofus --release dofus3 --output temp/
+                  npx cytrus-v6 download --game dofus --release dofus3 --output temp/
                   --select **/StreamingAssets/Content/Data/**/*.bundle
                   --select **/StreamingAssets/Content/I18n/*.bin
                   --select **/GameAssembly.dll
@@ -173,20 +162,15 @@ jobs:
             - name: Restore cached dependencies
               uses: actions/cache@v4
               with:
-                  path: |
-                      parser/node_modules
-                      ${{ env.APPDATA }}\npm
+                  path: parser/node_modules
                   key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-deps-
 
-            - name: Install cytrus-v6
-              run: npm i -g cytrus-v6
-
             - name: Extract map bundles with cytrus
               working-directory: ./parser
               run: >
-                  cytrus-v6 download --game dofus --release dofus3 --output temp/
+                  npx cytrus-v6 download --game dofus --release dofus3 --output temp/
                   --select **/StreamingAssets/Content/Map/Data/**/*.bundle
 
             - name: Parse map bundles and create maps.sqlite
