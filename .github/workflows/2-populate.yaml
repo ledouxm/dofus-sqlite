@@ -51,17 +51,14 @@ jobs:
               with:
                   version: 10.12.4
 
-            - name: Cache dependencies
-              id: cache
-              uses: actions/cache@v4
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
               with:
-                  path: parser/node_modules
-                  key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-deps-
+                  node-version: "20"
+                  cache: "pnpm"
+                  cache-dependency-path: parser/pnpm-lock.yaml
 
             - name: Install parser dependencies
-              if: steps.cache.outputs.cache-hit != 'true'
               working-directory: ./parser
               run: pnpm install --frozen-lockfile
 
@@ -117,13 +114,16 @@ jobs:
               with:
                   version: 10.12.4
 
-            - name: Restore cached dependencies
-              uses: actions/cache@v4
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
               with:
-                  path: parser/node_modules
-                  key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-deps-
+                  node-version: "20"
+                  cache: "pnpm"
+                  cache-dependency-path: parser/pnpm-lock.yaml
+
+            - name: Install parser dependencies
+              working-directory: ./parser
+              run: pnpm install --frozen-lockfile
 
             - name: Download data-files artifact
               uses: actions/download-artifact@v4
@@ -203,13 +203,16 @@ jobs:
               with:
                   version: 10.12.4
 
-            - name: Restore cached dependencies
-              uses: actions/cache@v4
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
               with:
-                  path: parser/node_modules
-                  key: ${{ runner.os }}-deps-${{ hashFiles('parser/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-deps-
+                  node-version: "20"
+                  cache: "pnpm"
+                  cache-dependency-path: parser/pnpm-lock.yaml
+
+            - name: Install parser dependencies
+              working-directory: ./parser
+              run: pnpm install --frozen-lockfile
 
             - name: Download map-bundles artifact
               uses: actions/download-artifact@v4
