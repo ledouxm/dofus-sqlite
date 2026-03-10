@@ -21,8 +21,8 @@ const DLL_PATH = "../cs/bin/Debug/net7.0/unity-bundle-unwrap.dll";
 
 const main = async () => {
   console.log("### PARSING BUNDLE FILES");
-  const bundleFiles = await fs.readdir(path.join(INPUT_FOLDER, "Data"));
-  const translationsFiles = await fs.readdir(path.join(INPUT_FOLDER, "I18n"));
+  const bundleFiles = await fs.readdir(path.join(INPUT_FOLDER, "Data")).catch(() => [] as string[]);
+  const translationsFiles = await fs.readdir(path.join(INPUT_FOLDER, "I18n")).catch(() => [] as string[]);
 
   await createFoldersRecursively(OUTPUT_FOLDER);
 
