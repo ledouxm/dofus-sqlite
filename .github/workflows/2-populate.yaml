@@ -65,11 +65,15 @@ jobs:
               working-directory: ./parser
               run: pnpm install --frozen-lockfile
 
-            - name: Download data files
+            - name: Download data bundles
               run: >
-                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp/
+                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-data/
                   --select **/StreamingAssets/Content/Data/**/*.bundle
                   --select **/StreamingAssets/Content/I18n/*.bin
+
+            - name: Download game binaries
+              run: >
+                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-binaries/
                   --select **/GameAssembly.dll
                   --select **/global-metadata.dat
 
@@ -78,11 +82,18 @@ jobs:
                   npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-maps/
                   --select **/StreamingAssets/Content/Map/Data/**/*.bundle
 
-            - name: Upload game-data artifact
+            - name: Upload data-files artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: game-data
-                  path: parser/temp/
+                  name: data-files
+                  path: parser/temp-data/
+                  retention-days: 1
+
+            - name: Upload game-binaries artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: game-binaries
+                  path: parser/temp-binaries/
                   retention-days: 1
 
             - name: Upload map-bundles artifact
@@ -114,10 +125,10 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-deps-
 
-            - name: Download game-data artifact
+            - name: Download data-files artifact
               uses: actions/download-artifact@v4
               with:
-                  name: game-data
+                  name: data-files
                   path: parser/temp/
 
             - name: Parse files to JSON
@@ -160,10 +171,10 @@ jobs:
               with:
                   dotnet-version: "7"
 
-            - name: Download game-data artifact
+            - name: Download game-binaries artifact
               uses: actions/download-artifact@v4
               with:
-                  name: game-data
+                  name: game-binaries
                   path: parser/temp/
 
             - name: Run Il2CppDumper
