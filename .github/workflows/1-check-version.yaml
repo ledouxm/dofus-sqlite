@@ -113,6 +113,11 @@ jobs:
                   TAG="v${{ needs.check-version.outputs.release_tag }}"
                   IS_DEV="${{ needs.check-version.outputs.is_dev }}"
 
+                  if gh release view "$TAG" --repo "${{ github.repository }}" &>/dev/null; then
+                    echo "Release $TAG already exists, skipping creation"
+                    exit 0
+                  fi
+
                   NOTES="Quick links:"$'\n'
                   NOTES+="  - [dofus.sqlite](https://github.com/${{ github.repository }}/releases/download/${TAG}/dofus.sqlite)"$'\n'
                   NOTES+="  - [dofus.proto](https://github.com/${{ github.repository }}/releases/download/${TAG}/dofus.proto)"$'\n'
