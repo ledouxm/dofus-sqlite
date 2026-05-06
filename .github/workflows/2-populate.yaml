@@ -245,3 +245,21 @@ jobs:
               run: |
                   $tag = "v${{ needs.setup.outputs.release_tag }}"
                   gh release upload $tag parser/maps.sqlite
+
+    promote-release:
+        name: Promote to Full Release
+        needs: [setup, populate-data, il2cpp-proto, populate-maps]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Promote pre-release to release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  TAG="v${{ needs.setup.outputs.release_tag }}"
+                  if echo "$TAG" | grep -q "\-dev\-"; then
+                    echo "Dev release, skipping promotion"
+                  else
+                    gh release edit "$TAG" --repo "${{ github.repository }}" --prerelease=false
+                    echo "Promoted $TAG to full release"
+                  fi
