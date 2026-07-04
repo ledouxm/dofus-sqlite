@@ -17,10 +17,35 @@ permissions:
     actions: read
 
 jobs:
+    check-artifact:
+        name: Check Release Tag Artifact
+        runs-on: ubuntu-latest
+        if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+        outputs:
+            exists: ${{ steps.check.outputs.exists }}
+
+        steps:
+            - name: Check for release-tag artifact
+              id: check
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                  else
+                    found=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts --jq '.artifacts[] | select(.name=="release-tag") | .name')
+                    if [ -n "$found" ]; then
+                      echo "exists=true" >> $GITHUB_OUTPUT
+                    else
+                      echo "exists=false" >> $GITHUB_OUTPUT
+                    fi
+                  fi
+
     setup:
         name: Install Dependencies and Download Game Files
+        needs: check-artifact
         runs-on: windows-latest
-        if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+        if: needs.check-artifact.outputs.exists == 'true'
         outputs:
             release_tag: ${{ steps.tag.outputs.release_tag }}
 
