@@ -285,6 +285,6 @@ jobs:
                   if echo "$TAG" | grep -q "\-dev\-"; then
                     echo "Dev release, skipping promotion"
                   else
-                    gh release edit "$TAG" --repo "${{ github.repository }}" --prerelease=false
+                    gh release edit "$TAG" --repo "${{ github.repository }}" --prerelease=false --latest
                     echo "Promoted $TAG to full release"
                   fi
