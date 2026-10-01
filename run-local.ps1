@@ -155,8 +155,6 @@ if ($SkipDatabase) {
 }
 
 # ── Parse map bundles to maps.sqlite ─────────────────────────────────────────
-# Mirrors the CI populate-maps job: map JSON goes to json-maps/ so it never ends up
-# in dofus.sqlite or in the uploaded release assets
 if ($SkipMaps) {
     Write-Skip "Map bundle parsing (maps.sqlite)"
 } else {
@@ -164,13 +162,11 @@ if ($SkipMaps) {
     Push-Location "$ScriptRoot\parser"
     try {
         $env:INPUT_FOLDER = "temp/"
-        $env:OUTPUT_FOLDER = "json-maps/"
         $env:MAP_INTERACTIONS_DB = "maps.sqlite"
-        pnpm extract
-        if ($LASTEXITCODE -ne 0) { throw "pnpm extract (maps) failed" }
+        pnpm maps
+        if ($LASTEXITCODE -ne 0) { throw "pnpm maps failed" }
     } finally {
         Remove-Item Env:\INPUT_FOLDER -ErrorAction SilentlyContinue
-        Remove-Item Env:\OUTPUT_FOLDER -ErrorAction SilentlyContinue
         Remove-Item Env:\MAP_INTERACTIONS_DB -ErrorAction SilentlyContinue
         Pop-Location
     }

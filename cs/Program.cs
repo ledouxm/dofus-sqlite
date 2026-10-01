@@ -3,10 +3,12 @@ using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using Newtonsoft.Json.Linq;
 
-// "images" is a separate root command: as a DotMake subcommand it would inherit
-// the bundle command's required arguments
+// "images" and "map-interactions" are separate root commands: as DotMake subcommands
+// they would inherit the bundle command's required arguments
 if (args.Length > 0 && args[0] == "images")
     Cli.Run<ImagesCommand>(args[1..]);
+else if (args.Length > 0 && args[0] == "map-interactions")
+    Cli.Run<MapInteractionsCommand>(args[1..]);
 else
     Cli.Run<DodudaBundleUnpack>(args);
 
@@ -264,4 +266,16 @@ public class ImagesCommand
     public string[] Only { get; set; } = [];
 
     public void Run() => ImageExport.Run(InputDir, OutputDir, Only);
+}
+
+[CliCommand(Description = "Extract interactive elements from map bundles to a JSON array")]
+public class MapInteractionsCommand
+{
+    [CliArgument(Description = "Folder containing the mapdata_assets_world_*.bundle files")]
+    public required string InputDir { get; set; }
+
+    [CliArgument(Description = "Output json file path")]
+    public required string OutJsonPath { get; set; }
+
+    public void Run() => MapInteractions.Run(InputDir, OutJsonPath);
 }

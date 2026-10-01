@@ -270,10 +270,9 @@ jobs:
 
             - name: Parse map bundles and create maps.sqlite
               working-directory: ./parser
-              run: pnpm extract
+              run: pnpm maps
               env:
                   INPUT_FOLDER: temp/
-                  OUTPUT_FOLDER: json/
                   MAP_INTERACTIONS_DB: maps.sqlite
 
             - name: Upload maps.sqlite to pre-release

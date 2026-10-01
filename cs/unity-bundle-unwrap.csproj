@@ -6,6 +6,9 @@
     <RootNamespace>unity_bundle_unwrap</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
+    <!-- Bundles are parsed in parallel and allocate millions of small objects: with the
+         default workstation GC, threads mostly wait on each other (map-interactions: 2m13 -> 11s) -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>

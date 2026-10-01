@@ -25,6 +25,5 @@ Il2CppDumper/*
 !Il2CppDumper/config.json
 !Il2CppDumper/protodec.exe
 .references
-json-maps/
 parser/images/
 parser/temp-*/

@@ -112,7 +112,7 @@ Releases are produced by 2 GitHub Actions workflows that chain together automati
 
 - **data**: parses `Data/**/*.bundle` and `I18n/*.bin` to JSON (`pnpm extract`), generates `dofus.sqlite` (`pnpm db`), uploads both
 - **proto**: runs `Il2CppDumper.exe` then `protodec.exe` on `GameAssembly.dll` + `global-metadata.dat` → `dofus.proto`
-- **maps**: parses `Map/Data/**/*.bundle` → `maps.sqlite` (`pnpm extract` with `MAP_INTERACTIONS_DB=maps.sqlite`)
+- **maps**: parses `Map/Data/**/*.bundle` → `maps.sqlite` (`pnpm maps`)
 - **images**: exports `Picto/**/*.bundle` → `images-<category>.zip` (`dotnet cs/... images <picto folder> <output folder>`)
 
 Once all four succeed, the release is promoted from pre-release to latest (dev releases stay drafts). Workflow 2 also supports `workflow_dispatch` with a `release_tag` input to re-populate an existing pre-release without re-running the version check; uploads overwrite existing assets.
@@ -145,7 +145,7 @@ dotnet build cs -c Release
 dotnet cs/bin/Release/net8.0/unity-bundle-unwrap.dll images <folder with Picto bundles> <output folder> [--only item monster]
 ```
 
-Map bundles are only parsed when `MAP_INTERACTIONS_DB` is set (e.g. `MAP_INTERACTIONS_DB=maps.sqlite`). Use a different `OUTPUT_FOLDER` for that run, so the map JSON doesn't end up next to the data JSON.
+`pnpm maps` reads the map bundles (`<INPUT_FOLDER>/Dofus_Data/StreamingAssets/Content/Map/Data`) and writes the interactive elements of every map to `maps.sqlite` (or `MAP_INTERACTIONS_DB`). It doesn't go through JSON: the C# tool's `map-interactions` command reads only those elements, all bundles in parallel.
 
 ### Running the pipeline locally
 
