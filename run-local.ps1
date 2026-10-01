@@ -12,6 +12,12 @@
 .PARAMETER SkipDatabase
     Skip the SQLite database generation step.
 
+.PARAMETER SkipMaps
+    Skip the map bundle parsing step (maps.sqlite).
+
+.PARAMETER SkipImages
+    Skip the image export step (images-<category>.zip).
+
 .PARAMETER SkipProto
     Skip the Il2CppDumper + protodec step.
 
@@ -41,6 +47,8 @@ param(
     [switch]$SkipDownload,
     [switch]$SkipParse,
     [switch]$SkipDatabase,
+    [switch]$SkipMaps,
+    [switch]$SkipImages,
     [switch]$SkipProto,
     [switch]$CreateRelease,
     [string]$ReleaseTag = ""
@@ -101,6 +109,7 @@ if ($SkipDownload) {
             --select "**/StreamingAssets/Content/Data/**/*.bundle" `
             --select "**/StreamingAssets/Content/I18n/*.bin" `
             --select "**/StreamingAssets/Content/Map/Data/**/*.bundle" `
+            --select "**/StreamingAssets/Content/Picto/**/*.bundle" `
             --select "**/GameAssembly.dll" `
             --select "**/global-metadata.dat"
         if ($LASTEXITCODE -ne 0) { throw "cytrus-v6 download failed" }
@@ -145,6 +154,41 @@ if ($SkipDatabase) {
     }
 }
 
+# ── Parse map bundles to maps.sqlite ─────────────────────────────────────────
+# Mirrors the CI populate-maps job: map JSON goes to json-maps/ so it never ends up
+# in dofus.sqlite or in the uploaded release assets
+if ($SkipMaps) {
+    Write-Skip "Map bundle parsing (maps.sqlite)"
+} else {
+    Write-Step "Parsing map bundles to maps.sqlite"
+    Push-Location "$ScriptRoot\parser"
+    try {
+        $env:INPUT_FOLDER = "temp/"
+        $env:OUTPUT_FOLDER = "json-maps/"
+        $env:MAP_INTERACTIONS_DB = "maps.sqlite"
+        pnpm extract
+        if ($LASTEXITCODE -ne 0) { throw "pnpm extract (maps) failed" }
+    } finally {
+        Remove-Item Env:\INPUT_FOLDER -ErrorAction SilentlyContinue
+        Remove-Item Env:\OUTPUT_FOLDER -ErrorAction SilentlyContinue
+        Remove-Item Env:\MAP_INTERACTIONS_DB -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+}
+
+# ── Export images to zips ─────────────────────────────────────────────────────
+if ($SkipImages) {
+    Write-Skip "Image export (images-<category>.zip)"
+} else {
+    Write-Step "Exporting images to parser\images\"
+    dotnet build "$ScriptRoot\cs" -c Release
+    if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
+    dotnet "$ScriptRoot\cs\bin\Release\net8.0\unity-bundle-unwrap.dll" images `
+        "$ScriptRoot\parser\temp\Dofus_Data\StreamingAssets\Content\Picto" `
+        "$ScriptRoot\parser\images"
+    if ($LASTEXITCODE -ne 0) { throw "image export failed" }
+}
+
 # ── Il2CppDumper + protodec ───────────────────────────────────────────────────
 if ($SkipProto) {
     Write-Skip "Il2CppDumper + protodec"
@@ -173,9 +217,11 @@ if ($CreateRelease) {
 
     $notes = "Quick links:`n"
     $notes += "  - [dofus.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v$tag/dofus.sqlite)`n"
-    $notes += "  - [dofus.proto](https://github.com/ledouxm/dofus-sqlite/releases/download/v$tag/dofus.proto)`n`n"
+    $notes += "  - [dofus.proto](https://github.com/ledouxm/dofus-sqlite/releases/download/v$tag/dofus.proto)`n"
+    $notes += "  - [maps.sqlite](https://github.com/ledouxm/dofus-sqlite/releases/download/v$tag/maps.sqlite)`n`n"
     $notes += "Release contains:`n`n"
     $notes += "- dofus.sqlite database file`n"
+    $notes += "- maps.sqlite map interactions database`n"
     $notes += "- i18n files`n"
     $notes += "- Dofus 3 data files`n"
     $notes += "- Dofus obfuscated proto file`n`n"
@@ -184,12 +230,13 @@ if ($CreateRelease) {
     gh release create "v$tag" --title "Dev Release $tag" --notes $notes --draft=true --prerelease
     if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
 
-    $files = Get-ChildItem -Path "$ScriptRoot\parser\json" -File
-    foreach ($file in $files) {
-        gh release upload "v$tag" $file.FullName
+    $files = @((Get-ChildItem -Path "$ScriptRoot\parser\json" -File).FullName)
+    $files += "$ScriptRoot\parser\dofus.sqlite", "$ScriptRoot\parser\dofus.proto", "$ScriptRoot\parser\maps.sqlite"
+    if (Test-Path "$ScriptRoot\parser\images") {
+        $files += @((Get-ChildItem -Path "$ScriptRoot\parser\images" -Filter "images-*.zip" -File).FullName)
     }
-    gh release upload "v$tag" "$ScriptRoot\parser\dofus.sqlite"
-    gh release upload "v$tag" "$ScriptRoot\parser\dofus.proto"
+    $files = @($files | Where-Object { Test-Path $_ })
+    gh release upload "v$tag" @files --clobber
     if ($LASTEXITCODE -ne 0) { throw "gh release upload failed" }
 
     Write-Host "`nRelease created: v$tag" -ForegroundColor Green

@@ -7,13 +7,14 @@ export const generateTranslations = async (filePath: string, db: Database) => {
   const file = await fs.readFile(filePath, "utf-8");
   const translations = JSON.parse(file);
 
+  // id is an INTEGER so joins against the *Id columns (all INTEGER) can use the index
   db.exec(`
       CREATE TABLE IF NOT EXISTS translations (
-      id TEXT,
+      id INTEGER NOT NULL,
       value TEXT,
-      lang TEXT,
+      lang TEXT NOT NULL,
       PRIMARY KEY (id, lang)
-      );
+      ) WITHOUT ROWID;
   `);
 
   console.log(
@@ -28,7 +29,7 @@ export const generateTranslations = async (filePath: string, db: Database) => {
 
   db.transaction(() => {
     for (const [key, value] of Object.entries(translations)) {
-      insert.run(key, value, lang);
+      insert.run(Number(key), value, lang);
     }
   })();
 

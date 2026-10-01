@@ -3,7 +3,12 @@ using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using Newtonsoft.Json.Linq;
 
-Cli.Run<DodudaBundleUnpack>(args);
+// "images" is a separate root command: as a DotMake subcommand it would inherit
+// the bundle command's required arguments
+if (args.Length > 0 && args[0] == "images")
+    Cli.Run<ImagesCommand>(args[1..]);
+else
+    Cli.Run<DodudaBundleUnpack>(args);
 
 [CliCommand(Description = "The root cli command")]
 public class DodudaBundleUnpack
@@ -244,4 +249,19 @@ public class DodudaBundleUnpack
             File.WriteAllText(OutJsonPath, result.ToString(Newtonsoft.Json.Formatting.None));
         }
     }
+}
+
+[CliCommand(Description = "Export Picto bundle textures as PNGs, one zip per category")]
+public class ImagesCommand
+{
+    [CliArgument(Description = "Folder containing the Picto bundles (searched recursively)")]
+    public required string InputDir { get; set; }
+
+    [CliArgument(Description = "Folder where images-<category>.zip files are written")]
+    public required string OutputDir { get; set; }
+
+    [CliOption(Description = "Only export these categories (e.g. item monster)", Required = false)]
+    public string[] Only { get; set; } = [];
+
+    public void Run() => ImageExport.Run(InputDir, OutputDir, Only);
 }

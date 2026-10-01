@@ -17,7 +17,7 @@ export const INPUT_FOLDER = path.join(
 
 const OUTPUT_FOLDER = process.env.OUTPUT_FOLDER ?? "../output";
 
-const DLL_PATH = "../cs/bin/Debug/net7.0/unity-bundle-unwrap.dll";
+const DLL_PATH = "../cs/bin/Debug/net8.0/unity-bundle-unwrap.dll";
 
 const main = async () => {
   console.log("### PARSING BUNDLE FILES");
@@ -77,6 +77,12 @@ const main = async () => {
 };
 
 const parseMapBundles = async () => {
+  const MAP_INTERACTIONS_DB = process.env.MAP_INTERACTIONS_DB;
+  if (!MAP_INTERACTIONS_DB) {
+    console.log("MAP_INTERACTIONS_DB not set, skipping map bundle parsing.");
+    return;
+  }
+
   const mapDataDir = path.join(INPUT_FOLDER, "Map", "Data");
 
   let files: string[];
@@ -98,7 +104,6 @@ const parseMapBundles = async () => {
 
   console.log(`### PARSING ${mapBundles.length} MAP DATA BUNDLES`);
 
-  const MAP_INTERACTIONS_DB = process.env.MAP_INTERACTIONS_DB ?? "map_interactions.sqlite";
   try { await fs.unlink(MAP_INTERACTIONS_DB); } catch {}
   const mapDb = new sqlite(MAP_INTERACTIONS_DB);
   mapDb.exec("PRAGMA journal_mode = WAL");

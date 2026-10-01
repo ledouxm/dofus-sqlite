@@ -12,6 +12,7 @@ Each release contains the following files:
 | `maps.sqlite` | Map interactions database — interactable elements and their positions per map |
 | `dofus.proto` | Obfuscated Protobuf definition extracted from the game binary |
 | `*.json` | Raw JSON files for every data class, one file per type |
+| `images-<category>.zip` | Game images as PNG, one zip per category (`item`, `monster`, `spell`, `emblem`, `worldmap`, ...) |
 
 ## How to use
 
@@ -49,19 +50,37 @@ const dialect = new SqliteDialect({ database });
 const db = new Kysely<DB>({ dialect });
 
 const potionRecipes = await db
-  .selectFrom("Items")
-  .innerJoin("Recipes", "Recipes.resultId", "Items.id")
-  .innerJoin("translations", "Items.nameId", "translations.id")
+  .selectFrom("ItemData")
+  .innerJoin("RecipeData", "RecipeData.resultId", "ItemData.id")
+  .innerJoin("translations", "ItemData.nameId", "translations.id")
   .where("translations.value", "like", "%potion%")
   .where("translations.lang", "=", "fr")
   .select(["translations.value as name"])
-  .selectAll(["Recipes"])
+  .selectAll(["RecipeData"])
   .execute();
 ```
 
+Tables are named after the game's data classes (`ItemData`, `RecipeData`, `MonsterData`, ...). Every `*NameId` / `*DescriptionId` column joins on `translations.id` (an `INTEGER`), filtered by `translations.lang` (`fr`, `en`, `es`, `de`, `pt`).
+
+A few classes are shared by several game files and get an extra `source` column (part of the primary key) telling which file a row comes from, e.g. `SocialRightData.source` is `guildrightgroups` or `alliancerightgroups`.
+
+## Images
+
+Each `images-<category>.zip` holds the PNGs of one category. When the game provides two resolutions, they sit in `1x/` and `2x/` folders. Paths follow the game's own asset paths where it has them, e.g. `images-emblem.zip` contains `big/up/2x/98.png` (each emblem layer: `up`, `backcontent`, `outlineguild`, `outlinealliance`).
+
+Most images can be joined to the database by their file name:
+
+| Zip | File name | Database column |
+|---|---|---|
+| `images-item.zip` | `1x/<id>.png`, `2x/<id>.png` | `ItemData.iconId` |
+| `images-monster.zip` | `1x/<id>.png`, `2x/<id>.png` | `MonsterData.gfxId` |
+| `images-spell.zip` | `1x/sort_<id>.png`, `2x/sort_<id>.png` | `SpellData.iconId` |
+
+A few bundles only name their textures, with several textures sharing a name. Those get the size, then an index, appended: `10_668x400.png`, `10_1024x1024_3.png`. World maps are exported as the tiles the game stores (one name per world map), not as assembled maps.
+
 ## How the pipeline works
 
-Releases are produced by 3 GitHub Actions workflows that chain together automatically. The data and map jobs run in parallel to cut down total release time:
+Releases are produced by 2 GitHub Actions workflows that chain together automatically:
 
 ```
 ┌──────────────────────────────────────────┐
@@ -69,34 +88,34 @@ Releases are produced by 3 GitHub Actions workflows that chain together automati
 │            ubuntu-latest                 │    or manual dispatch
 └─────────────────┬────────────────────────┘
                   │  creates pre-release, passes tag via artifact
-         ┌────────┴────────┐
-         ▼                 ▼        (run in parallel)
-┌────────────────┐  ┌──────────────────┐
-│  2 - Data      │  │  3 - Maps        │
-│  windows       │  │  windows         │
-└────────────────┘  └──────────────────┘
+                  ▼
+┌──────────────────────────────────────────┐
+│  2 - Populate Release: setup (windows)   │  downloads game files once, shares them as artifacts
+└─────────────────┬────────────────────────┘
+       ┌──────────┼───────────┬────────────┐      (run in parallel)
+       ▼          ▼           ▼            ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│  data    │ │  proto   │ │  maps    │ │  images  │
+│  windows │ │  windows │ │  windows │ │  ubuntu  │
+└────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
+     └────────────┴─────┬──────┴────────────┘
+                        ▼
+              promote to full release
 ```
 
-**Pipeline 1** checks the current Dofus 3 version via [cytrus-v6](https://www.npmjs.com/package/cytrus-v6). If the version changed (or the run was triggered manually or by a push to `development`), it creates a pre-release and publishes a `release-tag` artifact consumed by the next two pipelines.
+**Workflow 1** checks the current Dofus 3 version via [cytrus-v6](https://www.npmjs.com/package/cytrus-v6). If the version changed (or the run was triggered manually or by a push to `development`), it creates a pre-release and publishes a `release-tag` artifact consumed by workflow 2.
 
 - **Scheduled / manual** → compares against the latest non-prerelease; creates a standard pre-release
 - **Push to `development`** → always runs; creates a draft pre-release with a timestamp suffix
 
-**Pipeline 2** runs on Windows and downloads everything except map bundles:
+**Workflow 2** downloads the game files in a `setup` job, then runs these jobs in parallel:
 
-1. `Data/**/*.bundle` + `I18n/*.bin` + `GameAssembly.dll` + `global-metadata.dat`
-2. Parses bundles to JSON (`pnpm extract`)
-3. Generates `dofus.sqlite` (`pnpm db`)
-4. Runs `Il2CppDumper.exe` then `protodec.exe` → `dofus.proto`
-5. Uploads all output files flat to the pre-release
+- **data**: parses `Data/**/*.bundle` and `I18n/*.bin` to JSON (`pnpm extract`), generates `dofus.sqlite` (`pnpm db`), uploads both
+- **proto**: runs `Il2CppDumper.exe` then `protodec.exe` on `GameAssembly.dll` + `global-metadata.dat` → `dofus.proto`
+- **maps**: parses `Map/Data/**/*.bundle` → `maps.sqlite` (`pnpm extract` with `MAP_INTERACTIONS_DB=maps.sqlite`)
+- **images**: exports `Picto/**/*.bundle` → `images-<category>.zip` (`dotnet cs/... images <picto folder> <output folder>`)
 
-**Pipeline 3** runs on Windows in parallel and handles maps only:
-
-1. `Map/Data/**/*.bundle`
-2. Parses map interactions → `maps.sqlite` (`pnpm extract` with `MAP_INTERACTIONS_DB=maps.sqlite`)
-3. Uploads `maps.sqlite` flat to the pre-release
-
-Each pipeline also supports `workflow_dispatch` with a `release_tag` input so you can re-populate an existing pre-release without re-running the version check.
+Once all four succeed, the release is promoted from pre-release to latest (dev releases stay drafts). Workflow 2 also supports `workflow_dispatch` with a `release_tag` input to re-populate an existing pre-release without re-running the version check; uploads overwrite existing assets.
 
 ## Developer Instructions
 
@@ -104,7 +123,7 @@ Each pipeline also supports `workflow_dispatch` with a `release_tag` input so yo
 
 - [pnpm](https://pnpm.io/installation)
 - Node.js v20
-- dotnet v7
+- dotnet v8
 
 ### Setup
 
@@ -119,12 +138,21 @@ Copy the .env.dist file to a .env and fill your Dofus folder path
 1. First executes `pnpm extract` to convert game files to readable .json files
 2. Then runs `pnpm db` to generate a .sqlite file from .json files
 
+Images are exported by the C# tool directly, without going through JSON:
+
+```bash
+dotnet build cs -c Release
+dotnet cs/bin/Release/net8.0/unity-bundle-unwrap.dll images <folder with Picto bundles> <output folder> [--only item monster]
+```
+
+Map bundles are only parsed when `MAP_INTERACTIONS_DB` is set (e.g. `MAP_INTERACTIONS_DB=maps.sqlite`). Use a different `OUTPUT_FOLDER` for that run, so the map JSON doesn't end up next to the data JSON.
+
 ### Running the pipeline locally
 
 Use `run-local.ps1` to replicate the full CI pipeline on your machine:
 
 ```powershell
-# Full pipeline (download → parse → db → proto)
+# Full pipeline (download → parse → db → maps → images → proto)
 .\run-local.ps1
 
 # Skip download, re-parse and regenerate databases from existing temp/
@@ -133,8 +161,11 @@ Use `run-local.ps1` to replicate the full CI pipeline on your machine:
 # Skip download and parse, only regenerate databases from existing json/
 .\run-local.ps1 -SkipDownload -SkipParse
 
+# Only re-export images from existing temp/
+.\run-local.ps1 -SkipDownload -SkipParse -SkipDatabase -SkipMaps -SkipProto
+
 # Skip everything except proto generation
-.\run-local.ps1 -SkipDownload -SkipParse -SkipDatabase
+.\run-local.ps1 -SkipDownload -SkipParse -SkipDatabase -SkipMaps -SkipImages
 
 # Create a GitHub release after the pipeline (requires GH_TOKEN)
 .\run-local.ps1 -CreateRelease -ReleaseTag my-test

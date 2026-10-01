@@ -3,681 +3,267 @@
  * Please do not edit it manually.
  */
 
-export interface AbuseReasons {
-  abuseReasonId: number;
-  id: string;
-  mask: number;
-  reasonTextId: number;
-}
+import type { ColumnType } from "kysely";
 
-export interface AchievementCategories {
+export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
+  ? ColumnType<S, I | undefined, U>
+  : ColumnType<T, T | undefined, T>;
+
+export interface AchievementCategoryData {
   color: string;
   icon: string;
-  id: number;
+  id: Generated<number>;
   nameId: number;
   order: number;
-  parentId: number | null;
-  visibilityCriterion: string | null;
+  parentId: number;
+  visibilityCriterion: string;
 }
 
-export interface AchievementCategoriesAchievementIdsJunction {
-  AchievementCategories_id: number | null;
+export interface AchievementCategoryDataAchievementIdsJunction {
+  AchievementCategoryData_id: number | null;
   target_id: number | null;
 }
 
-export interface AchievementObjectives {
+export interface AchievementData {
+  accountLinked: number;
+  categoryId: number;
+  descriptionId: number;
+  iconId: number;
+  id: Generated<number>;
+  level: number;
+  nameId: number;
+  order: number;
+  points: number;
+}
+
+export interface AchievementDataObjectiveIdsJunction {
+  AchievementData_id: number | null;
+  target_id: number | null;
+}
+
+export interface AchievementDataRewardIdsJunction {
+  AchievementData_id: number | null;
+  target_id: number | null;
+}
+
+export interface AchievementObjectiveData {
   achievementId: number;
   criterion: string;
-  id: number;
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
+  order: number;
 }
 
-export interface AchievementProgress {
-  id: number;
-  name: string;
-  seasonId: number;
-}
-
-export interface AchievementProgressSteps {
+export interface AchievementRewardData {
   achievementId: number;
-  id: number;
-  isBuyable: number | null;
-  isCosmetic: number;
-  progressId: number;
-  score: number;
-}
-
-export interface AchievementRewards {
-  achievementId: number;
-  criteria: string;
+  alterationsReward: string;
+  criterions: string;
   emotesReward: string;
-  experienceRatio: number | null;
-  guildPoints: number | null;
-  id: number;
+  experienceRatio: number;
+  guildPoints: number;
+  id: Generated<number>;
   itemsQuantityReward: string;
   itemsReward: string;
-  kamasRatio: number | null;
-  kamasScaleWithPlayerLevel: number | null;
+  kamasRatio: number;
+  kamasScaleWithPlayerLevel: number;
   ornamentsReward: string;
   spellsReward: string;
   titlesReward: string;
 }
 
-export interface Achievements {
-  accountLinked: number | null;
-  categoryId: number;
-  descriptionId: number;
-  iconId: number;
-  id: number;
-  level: number;
-  nameId: number;
-  order: number | null;
-  points: number;
-}
-
-export interface AchievementsObjectiveIdsJunction {
-  Achievements_id: number | null;
-  target_id: number | null;
-}
-
-export interface AchievementsRewardIdsJunction {
-  Achievements_id: number | null;
-  target_id: number | null;
-}
-
-export interface ActionFilters {
-  id: number;
+export interface ActionFilterData {
+  id: Generated<number>;
   nameId: number;
   order: number;
 }
 
-export interface ActivitySuggestions {
+export interface ActivitySuggestionCategoryData {
+  id: Generated<number>;
+  nameId: number;
+  parentId: number;
+}
+
+export interface ActivitySuggestionData {
   categoryId: number;
   descriptionId: number;
-  endDate: number | null;
+  endDate: number;
   icon: string;
-  id: number;
-  isLarge: number | null;
+  iconCategoryId: number;
+  id: Generated<number>;
+  isLarge: number;
   level: number;
   mapId: number;
   nameId: number;
-  startDate: number | null;
+  startDate: number;
 }
 
-export interface ActivitySuggestionsCategories {
-  id: number;
-  nameId: number;
-  parentId: number | null;
-}
-
-export interface AlignmentGift {
-  id: number;
+export interface AlignmentGiftData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface AlignmentOrder {
-  id: number;
+export interface AlignmentOrderData {
+  id: Generated<number>;
   nameId: number;
-  sideId: number | null;
+  sideId: number;
 }
 
-export interface AlignmentRank {
+export interface AlignmentRankData {
   descriptionId: number;
-  id: number;
-  minimumAlignment: number | null;
+  id: Generated<number>;
+  minimumAlignment: number;
   nameId: number;
-  orderId: number | null;
+  orderId: number;
 }
 
-export interface AlignmentRankJntGift {
+export interface AlignmentRankGiftsData {
   gifts: string;
-  id: number;
-  levels: string;
+  id: Generated<number>;
 }
 
-export interface AlignmentSides {
-  id: number;
+export interface AlignmentSideData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface AlignmentTitles {
+export interface AlignmentTitleData {
   id: string;
   namesId: string;
   shortsId: string;
-  sideId: number | null;
+  sideId: number;
 }
 
-export interface AllianceRankNameSuggestions {
+export interface AllianceRankData {
+  gfxId: number;
+  id: Generated<number>;
+  isModifiable: number;
+  nameId: number;
+  order: number;
+}
+
+export interface AllianceRankNameSuggestionData {
   id: string;
   uiKey: string;
 }
 
-export interface AllianceRanks {
-  gfxId: number;
-  id: number;
-  isModifiable: number | null;
+export interface AllianceRightData {
+  groupId: number;
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
+  order: number;
 }
 
-export interface AllianceRightGroups {
-  id: number;
+export interface AllianceRightGroupData {
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
+  order: number;
   rights: string;
 }
 
-export interface AllianceRights {
-  groupId: number;
-  id: number;
+export interface AllianceTagData {
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
-}
-
-export interface AllianceTags {
-  id: number;
-  nameId: number;
-  order: number | null;
+  order: number;
   typeId: number;
 }
 
-export interface AllianceTagsTypes {
-  id: number;
+export interface AllianceTagTypeData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface AlmanaxCalendars {
-  descId: string;
-  id: number;
+export interface AlmanaxCalendarData {
+  categoryId: number;
+  celebrationDescriptionId: number;
+  celebrationNameId: number;
+  dates: string;
+  descId: number;
+  id: Generated<number>;
+  meridiaDescriptionId: number;
+  meridiaEffectId: number;
+  meridiaIllustrationId: number;
   nameId: number;
   npcId: number;
+  objectiveId: number;
+  rubrikabraxId: number;
 }
 
-export interface AlmanaxCalendarsBonusesIdsJunction {
-  AlmanaxCalendars_id: number | null;
+export interface AlmanaxCalendarDataBonusesIdsJunction {
+  AlmanaxCalendarData_id: number | null;
   target_id: number | null;
 }
 
-export interface AlterationCategories {
-  id: number;
+export interface AlmanaxCategoryData {
+  id: Generated<number>;
   nameId: number;
-  parentId: number | null;
+  protectorDescriptionId: number;
+  protectorIllustrationId: number;
+  protectorNameId: number;
 }
 
-export interface Alterations {
-  categoryId: number;
-  criteria: string | null;
+export interface AlmanaxZodiacData {
+  dateEnd: string;
+  dateStart: string;
   descriptionId: number;
-  iconId: number | null;
-  id: number;
-  isVisible: number | null;
+  id: Generated<number>;
+  nameId: number;
+  picture: string;
+}
+
+export interface AlterationCategoryData {
+  id: Generated<number>;
+  nameId: number;
+  parentId: number;
+}
+
+export interface AlterationData {
+  categoryId: number;
+  criterions: string;
+  descriptionId: number;
+  iconId: number;
+  id: Generated<number>;
+  isVisible: number;
   isWebDisplay: number;
   nameId: number;
   possibleEffects: string;
 }
 
-export interface Appearances {
+export interface AppearanceData {
   data: string;
-  id: number;
+  id: Generated<number>;
   type: number;
+  usePlayerLook: number;
 }
 
-export interface Areas {
+export interface AreaData {
   bounds: string;
   containHouses: number;
   containPaddocks: number;
   hasSuggestion: number;
-  hasWorldMap: number | null;
-  id: number;
+  hasWorldMap: number;
+  id: Generated<number>;
   nameId: number;
-  superAreaId: number | null;
-  worldmapId: number | null;
+  superAreaId: number;
+  worldmapId: number;
 }
 
-export interface ArenaLeagueRewards {
-  endSeasonRewards: number;
-  id: number;
-  leagueId: number;
-  seasonId: number;
-  titlesRewards: string;
+export interface AreaDataSubareaIdsJunction {
+  AreaData_id: number | null;
+  target_id: number | null;
 }
 
-export interface ArenaLeagues {
+export interface ArenaLeagueData {
   highRatingBound: number;
   icon: string;
-  id: number;
+  id: Generated<number>;
   illus: string;
-  isLastLeague: number | null;
-  lowRatingBound: number | null;
+  isLastLeague: number;
+  lowRatingBound: number;
   nameId: number;
   ornamentId: number;
 }
 
-export interface ArenaLeagueSeasons {
-  beginning: number;
-  closure: number;
-  flagObjectId: number;
-  id: string;
-  nameId: string;
-  resetDate: number | null;
-  uid: number;
-}
-
-export interface Bonuses {
-  amount: number;
-  id: number;
-  type: number;
-}
-
-export interface BonusesAreaCriterion {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BonusesCriterions {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BonusesCriterionsIdsJunction {
-  Bonuses_id: number | null;
-  target_id: number | null;
-}
-
-export interface BonusesEquippedItemCriterion {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BonusesMonsterCriterion {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BonusesMonsterFamilyCriterion {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BonusesQuestCategoryCriterion {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BonusesSubAreaCriterion {
-  id: number;
-  type: number;
-  value: number;
-}
-
-export interface BreachBosses {
-  accessCriterion: string;
-  apparitionCriterion: string;
-  category: number;
-  id: number;
-  incompatibleBosses: string;
-  monsterId: number;
-  rewardId: number;
-}
-
-export interface BreachDungeonModificators {
-  additionalRewardPercent: number;
-  criterion: string | null;
-  id: number;
-  isPositiveForPlayers: number | null;
-  modificatorId: number;
-  score: number;
-  tooltipBaseline: string;
-}
-
-export interface BreachInfinityLevels {
-  id: number;
-  level: number | null;
-  nameId: number;
-}
-
-export interface BreachPrizes {
-  categoryId: number;
-  currency: number | null;
-  descriptionKey: string | null;
-  id: number;
-  itemId: number;
-  nameId: number;
-  tooltipKey: string;
-}
-
-export interface BreachWorldMapCoordinates {
-  exploredMapIcon: number;
-  id: number;
-  mapCoordinateX: number;
-  mapCoordinateY: number;
-  mapStage: number;
-  unexploredMapIcon: number;
-}
-
-export interface BreachWorldMapSectors {
-  id: number;
-  legendId: string;
-  maxStage: number;
-  minStage: number;
-  sectorIcon: string;
-  sectorNameId: string;
-}
-
-export interface BreedRoles {
-  assetId: number;
-  color: number;
-  descriptionId: number;
-  id: number;
-  nameId: number;
-}
-
-export interface Breeds {
-  breedRoles: string;
-  breedSpellsId: string;
-  complexity: number;
-  creatureBonesId: number;
-  descriptionId: number;
-  femaleArtwork: number;
-  femaleColors: string;
-  femaleLook: string;
-  gameplayClassDescriptionId: string;
-  gameplayDescriptionId: string;
-  guideItemId: number;
-  id: number;
-  longNameId: string;
-  maleArtwork: number;
-  maleColors: string;
-  maleLook: string;
-  shortNameId: string;
-  sortIndex: number;
-  spawnMap: number;
-  statsPointsForAgility: string;
-  statsPointsForChance: string;
-  statsPointsForIntelligence: string;
-  statsPointsForStrength: string;
-  statsPointsForVitality: string;
-  statsPointsForWisdom: string;
-}
-
-export interface CensoredContents {
-  id: string;
-  lang: string;
-  newValue: number;
-  oldValue: number;
-  type: number;
-}
-
-export interface CensoredWords {
-  deepLooking: number | null;
-  id: number;
-  language: string;
-  listId: number | null;
-  word: string;
-}
-
-export interface Challenges {
-  activationCriterion: string;
-  categoryId: number;
-  completionCriterion: string;
-  descriptionId: number;
-  iconId: number;
-  id: number;
-  incompatibleChallenges: string;
-  nameId: number;
-  targetMonsterId: number | null;
-}
-
-export interface CharacteristicCategories {
-  id: number;
-  nameId: number;
-  order: number;
-}
-
-export interface CharacteristicCategoriesCharacteristicIdsJunction {
-  CharacteristicCategories_id: number | null;
-  target_id: number | null;
-}
-
-export interface Characteristics {
-  asset: string;
-  categoryId: number;
-  id: number;
-  keyword: string;
-  nameId: number;
-  order: number;
-  scaleFormulaId: number;
-  upgradable: number | null;
-  visible: number;
-}
-
-export interface CharacterXPMappings {
-  experiencePoints: number | null;
-  id: string;
-  level: number;
-}
-
-export interface ChatChannels {
-  allowObjects: number | null;
-  descriptionId: number;
-  id: number;
-  isPrivate: number | null;
-  nameId: number;
-  shortcut: string;
-  shortcutKey: string;
-}
-
-export interface Choices {
-  choiceNameId: number;
-  duration: number;
-  id: number;
-  options: string;
-  proposalCount: number;
-}
-
-export interface Collectables {
-  entityId: number;
-  gfxId: number | null;
-  id: string;
-  name: string;
-  order: number;
-  rarity: number;
-  typeId: number;
-}
-
-export interface Collections {
-  collectables: string;
-  criterion: string;
-  id: string;
-  name: string;
-  typeId: number;
-}
-
-export interface CompanionCharacteristics {
-  caracId: number | null;
-  companionId: number;
-  id: number;
-  order: number | null;
-  statPerLevelRange: string;
-}
-
-export interface Companions {
-  assetId: number;
-  characteristics: string;
-  creatureBoneId: number;
-  descriptionId: number;
-  id: number;
-  look: string;
-  nameId: number;
-  spells: string;
-  startingSpellLevelId: number;
-  visibility: string | null;
-  webDisplay: number;
-}
-
-export interface CompanionSpells {
-  companionId: number;
-  gradeByLevel: string;
-  id: number;
-  spellId: number;
-}
-
-export interface CreatureBonesOverrides {
-  boneId: number;
-  creatureBoneId: number;
-  id: string;
-}
-
-export interface CreatureBonesTypes {
-  creatureBoneId: number;
-  id: number;
-}
-
-export interface CustomModeBreedSpells {
-  breedId: number;
-  id: number;
-  isHidden: number | null;
-  isInitialSpell: number;
-  pairId: number;
-}
-
-export interface Documents {
-  authorId: string;
-  clientProperties: string | null;
-  contentCSS: string;
-  contentId: string;
-  id: number;
-  showBackgroundImage: number;
-  showTitle: number;
-  subTitleId: string;
-  titleId: string;
-  typeId: number;
-}
-
-export interface Dungeons {
-  entranceMapId: number;
-  exitMapId: number;
-  id: number;
-  nameId: number;
-  optimalPlayerLevel: number;
-}
-
-export interface DungeonsMapIdsJunction {
-  Dungeons_id: number | null;
-  target_id: number | null;
-}
-
-export interface EffectInstanceDice {
-  baseEffectId: number;
-  delay: number | null;
-  diceNum: number;
-  diceSide: number | null;
-  dispellable: number;
-  displayZero: number | null;
-  duration: number | null;
-  effectElement: number;
-  effectId: number;
-  effectTriggerDuration: number | null;
-  effectUid: number | null;
-  group: number | null;
-  id: string;
-  m_flags: number;
-  modificator: number | null;
-  order: number | null;
-  random: number | null;
-  spellId: number;
-  targetId: number | null;
-  targetMask: string | null;
-  triggers: string | null;
-  value: number | null;
-  zoneDescr: string;
-}
-
-export interface Effects {
-  actionFiltersId: string;
-  active: number | null;
-  bonusType: number | null;
-  boost: number | null;
-  category: number | null;
-  characteristic: number | null;
-  characteristicOperator: string | null;
-  descriptionId: number;
-  effectPowerRate: number | null;
-  effectPriority: number | null;
-  effectTriggerDuration: number | null;
-  elementId: number;
-  forceMinMax: number | null;
-  hideValueInTooltip: number;
-  iconId: number | null;
-  id: number;
-  isInPercent: number | null;
-  oppositeId: number | null;
-  showInSet: number | null;
-  showInTooltip: number | null;
-  textIconReferenceId: number | null;
-  theoreticalDescriptionId: string;
-  theoreticalPattern: number;
-  useDice: number | null;
-  useInFight: number | null;
-}
-
-export interface EmblemBackgrounds {
-  id: number;
-  order: number;
-}
-
-export interface EmblemSymbolCategories {
-  id: number;
-  nameId: number;
-}
-
-export interface EmblemSymbols {
-  categoryId: number;
-  colorizable: number;
-  iconId: number;
-  id: number;
-  order: number;
-  skinId: number;
-}
-
-export interface Emoticons {
-  animName: string;
-  aura: number | null;
-  cooldown: number;
-  duration: number | null;
-  eightDirections: number | null;
-  id: number;
-  nameId: number;
-  order: number;
-  persistancy: number | null;
-  scale: number;
-  shortcutId: string;
-  spellLevelId: number | null;
-  weight: number | null;
-}
-
-export interface EvolutiveEffects {
-  actionId: number;
-  id: number;
-  progressionPerLevelRange: string;
-  targetId: number;
-}
-
-export interface EvolutiveItemTypes {
-  experienceBoost: number;
-  experienceByLevel: string;
-  id: number;
-  maxLevel: number;
-}
-
-export interface ExpeditionSeasons {
+export interface ArenaLeagueSeasonData {
   beginning: number;
   closure: number;
   flagObjectId: number;
@@ -687,104 +273,687 @@ export interface ExpeditionSeasons {
   uid: number;
 }
 
-export interface ExternalNotifications {
+export interface AuctionHouseData {
+  allowedQuantities: string;
+  id: Generated<number>;
+  typeId: number;
+}
+
+export interface BodyData {
+  assetId: string;
+  availableAtCreation: number;
+  breed: number;
+  gender: number;
+  id: Generated<number>;
+  label: string;
+  nameId: number;
+  order: number;
+  payable: number;
+  skins: string;
+}
+
+export interface BonusCriterionData {
+  id: Generated<number>;
+  type: number;
+  value: number;
+}
+
+export interface BonusData {
+  amount: number;
+  id: Generated<number>;
+  type: number;
+}
+
+export interface BonusDataCriterionsIdsJunction {
+  BonusData_id: number | null;
+  target_id: number | null;
+}
+
+export interface BreachBossData {
+  accessCriterion: string;
+  apparitionCriterion: string;
+  category: number;
+  id: Generated<number>;
+  incompatibleBosses: string;
+  monsterId: number;
+  rewardId: number;
+}
+
+export interface BreachDungeonModificatorData {
+  additionalRewardPercent: number;
+  criterion: string;
+  id: Generated<number>;
+  isPositiveForPlayers: number;
+  modificatorId: number;
+  score: number;
+  tooltipBaseline: string;
+}
+
+export interface BreachPrizeData {
+  categoryId: number;
+  descriptionKey: string;
+  id: Generated<number>;
+  nameId: number;
+  tooltipKey: string;
+}
+
+export interface BreachWorldMapCoordinateData {
+  exploredMapIcon: number;
+  id: string;
+  mapCoordinateX: number;
+  mapCoordinateY: number;
+  mapStage: number;
+  unexploredMapIcon: number;
+}
+
+export interface BreachWorldMapSectorData {
+  id: Generated<number>;
+  legendId: string;
+  maxStage: number;
+  minStage: number;
+  sectorIcon: string;
+  sectorNameId: string;
+}
+
+export interface BreedData {
+  breedRoles: string;
+  breedSpellsId: string;
+  complexity: number;
+  creatureBonesId: number;
+  descriptionId: number;
+  femaleColors: string;
+  femaleLook: string;
+  gameplayDescriptionId: string;
+  id: Generated<number>;
+  maleColors: string;
+  maleLook: string;
+  shortNameId: string;
+  sortIndex: number;
+  statsPointsForAgility: string;
+  statsPointsForChance: string;
+  statsPointsForIntelligence: string;
+  statsPointsForStrength: string;
+  statsPointsForVitality: string;
+  statsPointsForWisdom: string;
+}
+
+export interface BreedRoleData {
+  assetId: number;
+  color: number;
+  descriptionId: number;
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface CalendarEventData {
+  categoryId: number;
+  criterion: string;
+  descriptionId: number;
+  id: Generated<number>;
+  map: number;
+  nameId: number;
+  picture: string;
+  recommendedLevel: number;
+  rewards: string;
+}
+
+export interface CardBackgroundData {
+  id: Generated<number>;
+  isDefault: number;
+  nameId: number;
+  picture: string;
+}
+
+export interface ChallengeData {
+  activationCriterion: string;
+  categoryId: number;
+  completionCriterion: string;
+  descriptionId: number;
+  iconId: number;
+  id: Generated<number>;
+  incompatibleChallenges: string;
+  nameId: number;
+  targetMonsterId: number;
+}
+
+export interface CharacteristicCategoryData {
+  id: Generated<number>;
+  nameId: number;
+  order: number;
+}
+
+export interface CharacteristicCategoryDataCharacteristicIdsJunction {
+  CharacteristicCategoryData_id: number | null;
+  target_id: number | null;
+}
+
+export interface CharacteristicData {
+  asset: string;
+  categoryId: number;
+  id: Generated<number>;
+  keyword: string;
+  nameId: number;
+  order: number;
+  scaleFormulaId: number;
+  upgradable: number;
+  visible: number;
+}
+
+export interface CharacterXpMappingData {
+  experiencePoints: number;
+  id: string;
+}
+
+export interface ChatChannelData {
+  descriptionId: number;
+  id: Generated<number>;
+  isPrivate: number;
+  nameId: number;
+  shortcut: string;
+}
+
+export interface ChoiceData {
+  choiceNameId: number;
+  duration: number;
+  id: Generated<number>;
+  options: string;
+  parentId: number;
+}
+
+export interface CollectableData {
+  entityId: number;
+  gfxId: number;
+  id: string;
+  name: string;
+  order: number;
+  rarity: number;
+  typeId: number;
+}
+
+export interface CollectionData {
+  collectables: string;
+  criterion: string;
+  id: string;
+  name: string;
+  typeId: number;
+}
+
+export interface CompanionCharacteristicData {
+  caracId: number;
+  companionId: number;
+  id: Generated<number>;
+  order: number;
+  statPerLevelRange: string;
+}
+
+export interface CompanionData {
+  assetId: number;
+  characteristics: string;
+  creatureBoneId: number;
+  descriptionId: number;
+  id: Generated<number>;
+  look: string;
+  nameId: number;
+  spells: string;
+  startingSpellLevelId: number;
+  visibility: string;
+  webDisplay: number;
+}
+
+export interface CompanionSpellData {
+  companionId: number;
+  gradeByLevel: string;
+  id: Generated<number>;
+  spellId: number;
+}
+
+export interface ConstantData {
+  id: Generated<number>;
+  value: string;
+}
+
+export interface CreatureBoneOverrideData {
+  boneId: number;
+  creatureBoneId: number;
+  id: string;
+}
+
+export interface CreatureBoneTypeData {
+  creatureBoneId: number;
+  id: Generated<number>;
+}
+
+export interface CustomModeBreedSpellData {
+  breedId: number;
+  id: Generated<number>;
+  isHidden: number;
+  isInitialSpell: number;
+  pairId: number;
+}
+
+export interface DocumentData {
+  authorId: string;
+  clientProperties: string;
+  contentCSS: string;
+  contentId: string;
+  id: Generated<number>;
+  showBackgroundImage: number;
+  showTitle: number;
+  subTitleId: string;
+  titleId: string;
+  typeId: number;
+}
+
+export interface DofusProgressionData {
+  backgroundColor: string;
+  descriptionId: number;
+  gfxId: string;
+  id: Generated<number>;
+  isEvent: number;
+  isPrimordial: number;
+  maxLevel: number;
+  minLevel: number;
+  nameId: number;
+  order: number;
+  prerequisites: string;
+  steps: string;
+}
+
+export interface DungeonData {
+  achievements: string;
+  availableInAutomaticGroupSearch: number;
+  availableInLobby: number;
+  availableOnKeyring: number;
+  bosses: string;
+  difficulty: number;
+  entranceMapId: number;
+  exitMapId: number;
+  id: Generated<number>;
+  minLevel: number;
+  nameId: number;
+  optimalPlayerLevel: number;
+  requiredObjects: string;
+}
+
+export interface DungeonDataMapIdsJunction {
+  DungeonData_id: number | null;
+  target_id: number | null;
+}
+
+export interface EffectData {
+  actionFiltersId: string;
+  active: number;
+  bonusType: number;
+  boost: number;
+  category: number;
+  characteristic: number;
+  characteristicOperator: string;
+  descriptionId: number;
+  effectPowerRate: number;
+  effectPriority: number;
+  effectTriggerDuration: number;
+  elementId: number;
+  forceMinMax: number;
+  hideValueInTooltip: number;
+  iconId: number;
+  id: Generated<number>;
+  isInPercent: number;
+  oppositeId: number;
+  parametersFixed: number;
+  showInSet: number;
+  showInTooltip: number;
+  textIconReferenceId: number;
+  theoreticalDescriptionId: string;
+  theoreticalPattern: number;
+  useDice: number;
+  useInFight: number;
+}
+
+export interface EffectInstanceDice {
+  baseEffectId: number;
+  delay: number;
+  diceNum: number;
+  diceSide: number;
+  dispellable: number;
+  displayZero: number;
+  duration: number;
+  effectElement: number;
+  effectId: number;
+  effectTriggerDuration: number;
+  effectUid: number;
+  group: number;
+  id: string;
+  m_flags: number;
+  modificator: number;
+  order: number;
+  random: number;
+  source: string;
+  spellId: number;
+  targetId: number;
+  targetMask: string;
+  triggers: string;
+  value: number;
+  zoneDescr: string;
+}
+
+export interface EmblemBackgroundData {
+  id: Generated<number>;
+  order: number;
+}
+
+export interface EmblemSymbolCategoryData {
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface EmblemSymbolData {
+  categoryId: number;
+  colorizable: number;
+  iconId: number;
+  id: Generated<number>;
+  order: number;
+  skinId: number;
+}
+
+export interface EmoticonData {
+  allowOnMount: number;
+  animName: string;
+  aura: number;
+  cooldown: number;
+  criterion: string;
+  duration: number;
+  eightDirections: number;
+  id: Generated<number>;
+  nameId: number;
+  order: number;
+  persistancy: number;
+  persistantAnimName: string;
+  scale: number;
+  shortcutId: string;
+  spellLevelId: number;
+  weight: number;
+}
+
+export interface EvolutiveEffectData {
+  actionId: number;
+  id: Generated<number>;
+  progressionPerLevelRange: string;
+  targetId: number;
+}
+
+export interface EvolutiveItemTypeData {
+  experienceBoost: number;
+  experienceByLevel: string;
+  id: Generated<number>;
+  maxLevel: number;
+}
+
+export interface ExpeditionSeasonData {
+  beginning: number;
+  closure: number;
+  flagObjectId: number;
+  id: string;
+  nameId: string;
+  resetDate: number;
+  uid: number;
+}
+
+export interface ExternalNotificationData {
   categoryId: number;
   colorId: number;
   defaultEnable: number;
   defaultMultiAccount: number;
-  defaultNotify: number | null;
+  defaultNotify: number;
   defaultSound: number;
   descriptionId: number;
   iconId: number;
-  id: number;
+  id: Generated<number>;
   messageId: string;
   name: string;
 }
 
-export interface FeatureDescriptions {
+export interface FeatureDescriptionData {
   children: string;
-  criterion: string | null;
+  criterion: string;
   descriptionId: number;
-  id: number;
+  id: Generated<number>;
   images: string;
   nameId: number;
-  parentId: number | null;
+  parentId: number;
   priority: number;
 }
 
-export interface FightScenarios {
-  id: number;
+export interface FightScenarioData {
+  id: Generated<number>;
   nameId: string;
 }
 
-export interface FinishMoves {
-  category: number;
-  duration: number;
-  free: number;
-  id: number;
-  nameId: number;
-  spellLevel: number;
-}
-
-export interface ForgettableSpells {
-  id: number;
+export interface ForgettableSpellData {
+  id: Generated<number>;
   itemId: number;
   pairId: number;
 }
 
-export interface GuildChestTabs {
-  cost: number | null;
+export interface GuildChestTabData {
+  cost: number;
   dropRight: number;
   gfxId: number;
   id: string;
   index: number;
   nameId: number;
   openRight: number;
-  seniority: number | null;
+  seniority: number;
   serverType: number;
   tabId: number;
   takeRight: number;
 }
 
-export interface GuildRankNameSuggestions {
+export interface GuildHallData {
+  id: Generated<number>;
+  mapId: number;
+  nameId: number;
+  subareaId: number;
+}
+
+export interface GuildHallThemeData {
+  id: Generated<number>;
+  nameId: number;
+  order: number;
+}
+
+export interface GuildLevelRewardData {
+  descriptionId: number;
+  id: string;
+  level: number;
+  nameId: number;
+  picto: string;
+}
+
+export interface GuildMissionActivityData {
+  id: Generated<number>;
+  level: number;
+  nameId: number;
+  recommendedPlayers: number;
+  rerollCost: number;
+}
+
+export interface GuildMissionActivityDataMilestonesIdsJunction {
+  GuildMissionActivityData_id: number | null;
+  target_id: number | null;
+}
+
+export interface GuildMissionData {
+  activityPoint: number;
+  categoryId: number;
+  gradeId: number;
+  id: Generated<number>;
+  nameId: number;
+  objectives: string;
+  rankId: number;
+  recommendedLevel: number;
+  superCategoryId: number;
+  token: number;
+}
+
+export interface GuildMissionGradeData {
+  activityPoint: number;
+  id: Generated<number>;
+  name: string;
+  rankId: number;
+  token: number;
+}
+
+export interface GuildMissionMilestoneData {
+  acknowledgmentPoint: number;
+  activityId: number;
+  activityPoint: number;
+  id: Generated<number>;
+  milestoneLevel: number;
+  nameId: number;
+  xp: number;
+}
+
+export interface GuildMissionObjectiveData {
+  activationCriterion: string;
+  alterationId: number;
+  areaId: number;
+  descriptionId: number;
+  familyId: number;
+  familyMonsters: string;
+  id: Generated<number>;
+  inDungeon: number;
+  intensity: number;
+  mapId: number;
+  minLevel: number;
+  missionId: number;
+  monsterId: number;
+  objectId: number;
+  order: number;
+  quantity: number;
+  quests: string;
+  seedId: number;
+  stage: number;
+  subareaId: number;
+  superCategoryId: number;
+}
+
+export interface GuildMissionRankData {
+  descriptionId: number;
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface GuildMissionSuperCategoryData {
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface GuildRaidData {
+  canFinish: number;
+  canRestart: number;
+  descriptionId: number;
+  duration: number;
+  goals: string;
+  groups: string;
+  id: Generated<number>;
+  maxPlayers: number;
+  maxScore: number;
+  minPlayers: number;
+  nameId: number;
+  playerHealth: number;
+  price: number;
+  type: number;
+  variables: string;
+}
+
+export interface GuildRaidsGoalData {
+  id: Generated<number>;
+  impactProgress: number;
+  nameId: number;
+  raidId: number;
+  requisiteForDisplay: string;
+  score: number;
+  value: number;
+}
+
+export interface GuildRaidsGroupData {
+  descriptionId: number;
+  id: Generated<number>;
+  maxPlayers: number;
+  minPlayers: number;
+  nameId: number;
+  raidId: number;
+}
+
+export interface GuildRaidsLaddersRewardData {
+  guildExperience: number;
+  id: Generated<number>;
+  items: string;
+  order: number;
+  ornaments: string;
+  percentage: number;
+  position: string;
+  raidId: number;
+  titles: string;
+}
+
+export interface GuildRaidsReward {
+  descriptionId: number;
+  experience: number;
+  id: Generated<number>;
+  kamas: number;
+  order: number;
+  raidId: number;
+  rewards: string;
+  score: number;
+}
+
+export interface GuildRankData {
+  gfxId: number;
+  id: Generated<number>;
+  nameId: number;
+  order: number;
+}
+
+export interface GuildRankNameSuggestionData {
   id: string;
   uiKey: string;
 }
 
-export interface GuildRanks {
-  gfxId: number;
-  id: number;
+export interface GuildRightData {
+  groupId: number;
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
+  order: number;
 }
 
-export interface GuildRightGroups {
-  id: number;
+export interface GuildRightGroupData {
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
+  order: number;
   rights: string;
 }
 
-export interface GuildRights {
-  groupId: number;
-  id: number;
+export interface GuildShopBoostData {
+  alterationId: number;
+  descriptionId: number;
+  id: Generated<number>;
   nameId: number;
-  order: number | null;
 }
 
-export interface GuildTags {
-  id: number;
+export interface GuildTagData {
+  id: Generated<number>;
   nameId: number;
   order: number;
   typeId: number;
 }
 
-export interface GuildTagsTypes {
-  id: number;
+export interface GuildTagTypeData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface HavenbagFurnitures {
+export interface HavenbagFurnitureData {
   blocksMovement: number;
   cellsHeight: number;
   cellsWidth: number;
@@ -792,58 +961,60 @@ export interface HavenbagFurnitures {
   elementId: number;
   gfxId: number;
   height: number;
-  horizontalSymmetry: number | null;
+  horizontalSymmetry: number;
   id: string;
   isStackable: number;
   layerId: number;
-  order: number | null;
+  order: number;
   origin: string;
   size: string;
-  skillId: number | null;
+  skillId: number;
   themeId: number;
   typeId: number;
 }
 
-export interface HavenbagThemes {
-  id: number;
+export interface HavenbagThemeData {
+  id: Generated<number>;
   mapId: number;
   nameId: number;
 }
 
-export interface Heads {
+export interface HeadData {
   assetId: string;
+  availableAtCreation: number;
   breed: number;
-  gender: number | null;
-  id: number;
+  gender: number;
+  id: Generated<number>;
   label: string;
-  order: number | null;
-  payable: number | null;
+  nameId: number;
+  order: number;
+  payable: number;
   skins: string;
 }
 
-export interface HintCategory {
-  id: number;
+export interface HintCategoryData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface Hints {
+export interface HintData {
   categoryId: number;
   gfx: number;
-  id: number;
-  level: number | null;
+  id: Generated<number>;
+  level: number;
   mapId: number;
   nameId: number;
-  outdoor: number | null;
-  realMapId: number | null;
+  outdoor: number;
+  realMapId: number;
   subareaId: number;
   worldMapId: number;
   x: number;
   y: number;
 }
 
-export interface Houses {
+export interface HouseData {
   defaultPrice: number;
-  descriptionId: number | null;
+  descriptionId: number;
   gfxId: number;
   id: string;
   nameId: number;
@@ -851,44 +1022,82 @@ export interface Houses {
   typeId: number;
 }
 
-export interface IncarnationLevels {
-  id: number;
-  incarnationId: number;
-  level: number;
-  requiredXp: number | null;
-}
-
-export interface InfoMessages {
+export interface IdleData {
+  animationKey: string;
+  breed: number;
+  criterion: string;
+  iconIdFemale: string;
+  iconIdMale: string;
   id: string;
-  messageId: number | null;
-  textId: number;
-  typeId: number | null;
+  known: number;
+  nameId: number;
+  order: number;
 }
 
-export interface Interactives {
-  actionId: number;
-  displayTooltip: number;
-  id: number;
+export interface InfiniteDreamIntensityData {
+  additionalLife: number;
+  dreamFragments: number;
+  dropBonus: number;
+  droplegend: number;
+  id: Generated<number>;
+  intensity: number;
+  money: number;
+  nameId: number;
+  xpBonus: number;
+}
+
+export interface InfiniteDreamRewardActionData {
+  duration: number;
+  effect: string;
+  id: Generated<number>;
+  isAlly: number;
+}
+
+export interface InfiniteDreamRewardData {
+  actions: string;
+  descriptionId: number;
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface Items {
-  appearanceId: number | null;
-  changeVersion: string | null;
-  craftConditional: string | null;
-  craftFeasible: string;
-  craftVisible: string;
+export interface InfiniteDreamTrialData {
+  achievementId: number;
+  achievementIntensity: number;
+  descriptionId: number;
+  id: Generated<number>;
+  nameId: number;
+  picture: string;
+  seed: string;
+}
+
+export interface InfoMessageData {
+  id: string;
+  messageId: number;
+  textId: number;
+  typeId: number;
+}
+
+export interface InteractiveData {
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface ItemData {
+  appearanceId: number;
+  craftConditionalCriterion: string;
+  craftFeasibleCriterion: string;
+  craftVisibleCriterion: string;
   craftXpRatio: number;
-  criteria: string | null;
-  criteriaTarget: string | null;
+  criterions: string;
+  criterionsTarget: string;
   descriptionId: number;
   favoriteRecyclingSubareas: string;
   favoriteSubAreas: string;
-  favoriteSubAreasBonus: number | null;
+  favoriteSubAreasBonus: number;
   iconId: number;
-  id: number;
-  importantNoticeId: string | null;
-  isColorable: number | null;
+  id: Generated<number>;
+  importantNoticeId: string;
+  isColorable: number;
   itemSetId: number;
   level: number;
   m_flags: number;
@@ -897,85 +1106,80 @@ export interface Items {
   price: number;
   realWeight: number;
   recipeSlots: number;
-  recyclingNuggets: number | null;
+  recyclingNuggets: number;
   resourcesBySubarea: string;
-  tooltipExpirationDate: string;
   typeId: number;
-  useAnimationId: number;
-  visibility: string | null;
+  visibilityCriterion: string;
 }
 
-export interface ItemsDropMonsterIdsJunction {
-  Items_id: number | null;
+export interface ItemDataDropMonsterIdsJunction {
+  ItemData_id: number | null;
   target_id: number | null;
 }
 
-export interface ItemsDropTemporisMonsterIdsJunction {
-  Items_id: number | null;
+export interface ItemDataDropTemporisMonsterIdsJunction {
+  ItemData_id: number | null;
   target_id: number | null;
 }
 
-export interface ItemSets {
-  bonusIsSecret: number | null;
+export interface ItemDataEvolutiveEffectIdsJunction {
+  ItemData_id: number | null;
+  target_id: number | null;
+}
+
+export interface ItemDataRecipeIdsJunction {
+  ItemData_id: number | null;
+  target_id: number | null;
+}
+
+export interface ItemSetData {
+  bonusIsSecret: number;
   effects: string;
-  id: number;
+  id: Generated<number>;
+  isCosmetic: number;
   items: string;
   nameId: number;
 }
 
-export interface ItemsEvolutiveEffectIdsJunction {
-  Items_id: number | null;
-  target_id: number | null;
-}
-
-export interface ItemsRecipeIdsJunction {
-  Items_id: number | null;
-  target_id: number | null;
-}
-
-export interface ItemSuperTypes {
-  id: number;
+export interface ItemSuperTypeData {
+  id: Generated<number>;
   possiblePositions: string;
 }
 
-export interface ItemTypes {
-  categoryId: number | null;
+export interface ItemTypeData {
+  categoryId: number;
   craftXpRatio: number;
-  evolutiveTypeId: number | null;
-  gender: number;
-  id: number;
+  evolutiveTypeId: number;
+  id: Generated<number>;
   isInEncyclopedia: number;
-  mimickable: number;
   nameId: number;
-  plural: number | null;
-  possiblePositions: string;
-  rawZone: string | null;
+  rawZone: string;
   superTypeId: number;
 }
 
-export interface Jobs {
-  hasLegendaryCraft: number | null;
+export interface JobData {
+  hasLegendaryCraft: number;
   iconId: number;
-  id: number;
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface KothRoles {
-  id: number;
-  isDefault: number | null;
+export interface KothRoleData {
+  id: Generated<number>;
+  isDefault: number;
   nameId: number;
 }
 
-export interface LegendaryPowersCategories {
+export interface LegendaryPowerCategoryData {
   categoryName: string;
   categoryOverridable: number;
   categorySpells: string;
-  id: number;
+  id: Generated<number>;
 }
 
-export interface LegendaryTreasureHunts {
+export interface LegendaryTreasureHuntData {
   chestId: number;
-  id: number;
+  id: Generated<number>;
   level: number;
   mapItemId: number;
   monsterId: number;
@@ -983,52 +1187,62 @@ export interface LegendaryTreasureHunts {
   xpRatio: number;
 }
 
-export interface LivingObjectSkinJntMood {
+export interface LivingObjectSkinMoodsData {
   id: string;
   moods: string;
   skinId: number;
 }
 
-export interface LuaFormulas {
-  formulaName: string;
-  id: number;
-  luaFormula: string;
+export interface LobbyTagData {
+  concurrentTags: string;
+  id: Generated<number>;
+  nameId: number;
 }
 
-export interface MapCoordinates {
+export interface LobbyTypeData {
+  id: Generated<number>;
+  maxMember: number;
+  minMember: number;
+  nameId: number;
+  tags: string;
+}
+
+export interface LuaFormulaData {
+  formula: string;
+  id: string;
+}
+
+export interface MapInformationData {
+  id: Generated<number>;
+  m_flags: number;
+  nameId: number;
+  posX: number;
+  posY: number;
+  subAreaId: number;
+  tacticalModeTemplateId: number;
+  worldMap: number;
+}
+
+export interface MapReferenceData {
+  cellId: number;
+  id: Generated<number>;
+  mapId: number;
+}
+
+export interface MapsCoordinateData {
   compressedCoords: number;
   id: string;
 }
 
-export interface MapCoordinatesMapIdsJunction {
-  MapCoordinates_id: number | null;
+export interface MapsCoordinateDataMapIdsJunction {
+  MapsCoordinateData_id: number | null;
   target_id: number | null;
 }
 
-export interface MapPositions {
-  fightSnapshot: string;
-  id: number;
-  m_flags: number;
-  nameId: number | null;
-  playlistIds: string;
-  posX: number | null;
-  posY: number | null;
-  roleplaySnapshot: string;
-  subAreaId: number;
-  tacticalModeTemplateId: number | null;
-  worldMap: number;
-}
-
-export interface MapReferences {
-  cellId: number;
-  id: number;
-  mapId: number;
-}
-
-export interface MapScrollActions {
+export interface MapScrollActionData {
   bottomExists: number;
   bottomMapId: number;
-  id: number;
+  id: Generated<number>;
   leftExists: number;
   leftMapId: number;
   rightExists: number;
@@ -1037,46 +1251,19 @@ export interface MapScrollActions {
   topMapId: number;
 }
 
-export interface Modsters {
-  id: number;
+export interface ModsterData {
+  id: Generated<number>;
   itemId: number;
   modsterAchievements: string;
   modsterActiveSpells: string;
   modsterHiddenAchievements: string;
   modsterId: number;
   modsterPassiveSpells: string;
-  order: number | null;
+  order: number;
   parentsModsterId: string;
 }
 
-export interface MonsterDropChanceBonus {
-  amount: number;
-  id: number;
-  type: number;
-}
-
-export interface MonsterDropChanceBonusCriterionsIdsJunction {
-  MonsterDropChanceBonus_id: number | null;
-  target_id: number | null;
-}
-
-export interface MonsterMiniBoss {
-  id: number;
-  monsterReplacingId: number;
-}
-
-export interface MonsterRaces {
-  aggressiveAttackDelay: number | null;
-  aggressiveImmunityCriterion: string | null;
-  aggressiveLevelDiff: number | null;
-  aggressiveZoneSize: number | null;
-  id: number;
-  monsters: string;
-  nameId: number;
-  superRaceId: number;
-}
-
-export interface Monsters {
+export interface MonsterData {
   aggressiveAttackDelay: number;
   aggressiveImmunityCriterion: string;
   aggressiveLevelDiff: number;
@@ -1084,331 +1271,379 @@ export interface Monsters {
   animFunList: string;
   characRatios: string;
   correspondingMiniBossId: number;
-  creatureBoneId: number | null;
+  creatureBoneId: number;
   drops: string;
   favoriteSubareaId: number;
   gfxId: number;
+  globalDrops: string;
   grades: string;
-  id: number;
+  id: Generated<number>;
   incompatibleChallenges: string;
   incompatibleIdols: string;
+  isBounty: number;
   look: string;
   m_flags: number;
   nameId: number;
   race: number;
   scaleGradeRef: number;
+  souls: string;
   speedAdjust: number;
   spellGrades: string;
   spells: string;
   subareas: string;
+  summonCost: number;
   temporisDrops: string;
 }
 
-export interface MonsterSuperRaces {
-  id: number;
+export interface MonsterMiniBossData {
+  id: Generated<number>;
+  monsterReplacingId: number;
+}
+
+export interface MonsterRaceData {
+  aggressiveAttackDelay: number;
+  aggressiveImmunityCriterion: string;
+  aggressiveLevelDiff: number;
+  aggressiveZoneSize: number;
+  id: Generated<number>;
+  monsters: string;
+  nameId: number;
+  superRaceId: number;
+}
+
+export interface MonsterSuperRaceData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface MonsterXPBonus {
-  amount: number;
-  id: number;
-  type: number;
-}
-
-export interface MonsterXPBonusCriterionsIdsJunction {
-  MonsterXPBonus_id: number | null;
-  target_id: number | null;
-}
-
-export interface Months {
-  id: number;
+export interface MonthData {
+  id: string;
   nameId: number;
 }
 
-export interface MountBehaviors {
+export interface MountBehaviorData {
   descriptionId: number;
-  id: number;
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface MountBones {
-  id: number;
+export interface MountBoneData {
+  id: Generated<number>;
 }
 
-export interface MountFamily {
-  headUri: string;
-  id: number;
-  nameId: number;
-}
-
-export interface Mounts {
+export interface MountData {
   certificateId: number;
   effects: string;
   familyId: number;
-  id: number;
+  id: Generated<number>;
   look: string;
   nameId: number;
 }
 
-export interface NamingRules {
-  id: number;
+export interface MountFamilyData {
+  headUri: string;
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface NamingRuleData {
+  id: Generated<number>;
   maxLength: number;
   minLength: number;
   regexp: string;
 }
 
-export interface Notifications {
-  cantBeClosed: number | null;
-  iconId: number | null;
-  id: number;
+export interface NotificationData {
+  cantBeClosed: number;
+  iconId: number;
+  id: Generated<number>;
   messageId: string;
   titleId: string;
-  trigger: string | null;
+  trigger: string;
   typeId: number;
 }
 
-export interface NpcActions {
-  id: number;
+export interface NpcActionData {
+  id: Generated<number>;
   nameId: number;
   realId: number;
 }
 
-export interface NpcMessages {
-  id: number;
-  messageId: string;
-  messageParams: string;
-}
-
-export interface Npcs {
+export interface NpcData {
   actions: string;
   animFunList: string;
+  defaultSkinId: number;
+  dialogData: string;
   dialogMessages: string;
   dialogReplies: string;
-  fastAnimsFun: number | null;
-  gender: number | null;
-  id: number;
+  fastAnimsFun: number;
+  gender: number;
+  id: Generated<number>;
   look: string;
   nameId: number;
   tooltipVisible: number;
 }
 
-export interface OptionalFeatures {
-  activationCriterions: string | null;
-  id: number;
-  isActivationOnLaunch: number | null;
-  isActivationOnServerConnection: number | null;
+export interface NpcDialogSkinData {
+  backgroundColor: string;
+  borderColor: string;
+  buttonsColorTypes: number;
+  fontColor: string;
+  gfxId: number;
+  hasHalo: number;
+  headerColor: string;
+  headerDecorationColor: string;
+  headerDecorationGfxId: number;
+  headerFontColor: string;
+  headerGfxId: number;
+  headerOrnamentColor: string;
+  headerOrnamentGfxId: number;
+  id: Generated<number>;
+  isBold: number;
+}
+
+export interface NpcMessageData {
+  id: Generated<number>;
+  messageBubblePosition: number;
+  messageId: string;
+  messageNpcMoodId: number;
+  messageParams: string;
+  messageSkinId: number;
+}
+
+export interface OptionalFeatureData {
+  activationCriterions: string;
+  id: Generated<number>;
+  isActivationOnLaunch: number;
+  isActivationOnServerConnection: number;
   isClient: number;
-  isServer: number | null;
+  isServer: number;
   keyword: string;
 }
 
-export interface Ornaments {
+export interface OrnamentData {
   assetId: number;
-  iconId: number | null;
-  id: number;
+  iconId: number;
+  id: Generated<number>;
   nameId: number;
   order: number;
   visible: number;
 }
 
-export interface Pack {
-  hasSubAreas: number;
-  id: number;
+export interface PaddockGaugesData {
+  id: Generated<number>;
   name: string;
+  tierMaxValues: string;
 }
 
-export interface Playlists {
-  crossfadeDuration: number;
-  id: number;
-  random: number | null;
-  sounds: string;
-  startRandom: number | null;
-  startRandomOnce: number | null;
-  type: number;
-}
-
-export interface PointOfInterest {
-  categoryId: number;
-  id: number;
+export interface PaddocksData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface PointOfInterestCategory {
-  id: number;
+export interface PointOfInterestData {
+  id: Generated<number>;
+  nameId: number;
 }
 
-export interface PopupInformations {
+export interface PopupInformationData {
   autoTrigger: number;
   buttons: string;
   cacheType: number;
   criterion: string;
   descriptionId: number;
-  id: number;
+  headerId: string;
+  id: Generated<number>;
   illuName: string;
   parentId: number;
   titleId: string;
 }
 
-export interface PresetIcons {
-  id: number;
-  order: number | null;
+export interface PresetIconData {
+  id: Generated<number>;
 }
 
-export interface QuestCategory {
-  id: number;
+export interface ProgressingAchievementSeasonData {
+  id: Generated<number>;
+  name: string;
+  seasonId: number;
+}
+
+export interface ProgressingAchievementStepData {
+  achievementId: number;
+  id: Generated<number>;
+  isBuyable: number;
+  isCosmetic: number;
+  progressId: number;
+  score: number;
+}
+
+export interface QuestCategoryData {
+  id: Generated<number>;
   nameId: number;
   order: number;
 }
 
-export interface QuestCategoryQuestIdsJunction {
-  QuestCategory_id: number | null;
+export interface QuestCategoryDataQuestIdsJunction {
+  QuestCategoryData_id: number | null;
   target_id: number | null;
 }
 
-export interface QuestKamasBonus {
-  amount: number;
-  id: number;
-  type: number;
-}
-
-export interface QuestKamasBonusCriterionsIdsJunction {
-  QuestKamasBonus_id: number | null;
-  target_id: number | null;
-}
-
-export interface QuestObjectiveBringItemToNpc {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveBringSoulToNpc {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveCraftItem {
-  coords: string;
-  dialogId: number;
-  id: number;
-  mapId: number | null;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveDiscoverMap {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number | null;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveDiscoverSubArea {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number | null;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveFightMonster {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number | null;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveFightMonstersOnMap {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveFreeForm {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveGoToNpc {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveMultiFightMonster {
-  coords: string;
-  dialogId: number | null;
-  id: number;
-  mapId: number | null;
-  parameters: string;
-  stepId: number;
-  typeId: number;
-}
-
-export interface QuestObjectiveTypes {
-  id: number;
-  nameId: number;
-}
-
-export interface Quests {
+export interface QuestData {
   categoryId: number;
   followable: number;
-  id: number;
-  isDungeonQuest: number | null;
-  isEvent: number | null;
-  isPartyQuest: number | null;
+  id: Generated<number>;
+  isDungeonQuest: number;
+  isEvent: number;
+  isPartyQuest: number;
   levelMax: number;
   levelMin: number;
   nameId: number;
   repeatLimit: number;
   repeatType: number;
   startCriterion: string;
+  startPosition: string;
+  type: number;
 }
 
-export interface QuestsStepIdsJunction {
-  Quests_id: number | null;
+export interface QuestDataStepIdsJunction {
+  QuestData_id: number | null;
   target_id: number | null;
 }
 
-export interface QuestStepRewards {
+export interface QuestObjectiveBringItemToNpcData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveBringSoulToNpcData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveCraftItemData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveDiscoverMapData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveDiscoverSubAreaData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveFightMonsterData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveFightMonstersOnMapData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveFreeFormData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveGoToNpcData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveMultiFightMonsterData {
+  coords: string;
+  dialogId: number;
+  id: Generated<number>;
+  mapId: number;
+  parameters: string;
+  stepId: number;
+  typeId: number;
+}
+
+export interface QuestObjectiveTypeData {
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface QuestStepData {
+  descriptionId: number;
+  dialogId: number;
+  duration: number;
+  id: Generated<number>;
+  nameId: number;
+  optimalLevel: number;
+  questId: number;
+}
+
+export interface QuestStepDataObjectiveIdsJunction {
+  QuestStepData_id: number | null;
+  target_id: number | null;
+}
+
+export interface QuestStepDataRewardsIdsJunction {
+  QuestStepData_id: number | null;
+  target_id: number | null;
+}
+
+export interface QuestStepRewardData {
   emotesReward: string;
   experienceRatio: number;
-  id: number;
+  id: Generated<number>;
   itemsReward: string;
   jobsReward: string;
   kamasRatio: number;
-  kamasScaleWithPlayerLevel: number | null;
+  kamasScaleWithPlayerLevel: number;
   levelMax: number;
   levelMin: number;
   spellsReward: string;
@@ -1416,48 +1651,13 @@ export interface QuestStepRewards {
   titlesReward: string;
 }
 
-export interface QuestSteps {
-  descriptionId: number;
-  dialogId: number;
-  duration: number;
-  id: number;
-  nameId: number;
-  optimalLevel: number;
-  questId: number;
-}
-
-export interface QuestStepsObjectiveIdsJunction {
-  QuestSteps_id: number | null;
-  target_id: number | null;
-}
-
-export interface QuestStepsRewardsIdsJunction {
-  QuestSteps_id: number | null;
-  target_id: number | null;
-}
-
-export interface QuestXPBonus {
-  amount: number;
-  id: number;
-  type: number;
-}
-
-export interface QuestXPBonusCriterionsIdsJunction {
-  QuestXPBonus_id: number | null;
-  target_id: number | null;
-}
-
-export interface RandomDropGroups {
-  description: string;
+export interface RandomDropGroupData {
   displayChances: number;
-  displayContent: number;
-  id: number;
-  name: string;
+  id: Generated<number>;
   randomDropItems: string;
 }
 
-export interface Recipes {
-  changeVersion: string | null;
+export interface RecipeData {
   id: string;
   jobId: number;
   quantities: string;
@@ -1466,24 +1666,56 @@ export interface Recipes {
   resultNameId: string;
   resultTypeId: number;
   skillId: number;
-  tooltipExpirationDate: string;
 }
 
-export interface RecipesIngredientIdsJunction {
-  Recipes_id: number | null;
+export interface RecipeDataIngredientIdsJunction {
+  RecipeData_id: number | null;
   target_id: number | null;
 }
 
-export interface RideFood {
+export interface RideFoodData {
   familyId: number;
   gid: number;
   id: string;
-  typeId: number | null;
+  typeId: number;
 }
 
-export interface ServerCommunities {
+export interface RideGaugesData {
+  id: Generated<number>;
+  maxMood: number;
+  maxValue: number;
+  minMood: number;
+}
+
+export interface RiderBoneData {
+  id: Generated<number>;
+}
+
+export interface RidesData {
+  breedingExperienceRewardQuantity: number;
+  breedingTokenRewardQuantity: number;
+  children: string;
+  colorId: number;
+  extractionRewardQuantity: number;
+  generation: number;
+  geneticWeight: number;
+  id: Generated<number>;
+  linkedItemGid: number;
+  nameId: number;
+  parents: string;
+  senileExtractionRewardQuantity: number;
+  speciesId: number;
+}
+
+export interface RideSpeciesData {
+  extractionRewardGid: number;
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface ServerCommunityData {
   defaultCountries: string;
-  id: number;
+  id: Generated<number>;
   nameId: number;
   namingRuleAdminId: number;
   namingRuleAllianceNameId: number;
@@ -1498,46 +1730,44 @@ export interface ServerCommunities {
   shortId: string;
 }
 
-export interface ServerCommunitiesSupportedLangIdsJunction {
-  ServerCommunities_id: number | null;
+export interface ServerCommunityDataSupportedLangIdsJunction {
+  ServerCommunityData_id: number | null;
   target_id: number | null;
 }
 
-export interface ServerGameTypes {
-  descriptionId: number;
-  id: number;
+export interface ServerData {
+  commentId: string;
+  communityId: number;
+  gameTypeId: number;
+  id: Generated<number>;
+  illus: string;
+  language: string;
+  monoAccount: number;
   nameId: number;
-  rulesId: string;
+  populationId: number;
+}
+
+export interface ServerGameTypeData {
+  descriptionId: number;
+  id: Generated<number>;
+  nameId: number;
+  rulesId: number;
   selectableByPlayer: number;
 }
 
-export interface ServerLangs {
-  id: number;
+export interface ServerLangData {
+  id: Generated<number>;
   langCode: string;
   nameId: number;
 }
 
-export interface ServerPopulations {
-  id: number;
+export interface ServerPopulationData {
+  id: Generated<number>;
   nameId: number;
   weight: number;
 }
 
-export interface Servers {
-  commentId: string;
-  communityId: number;
-  gameTypeId: number;
-  id: number;
-  illus: string;
-  language: string;
-  monoAccount: number | null;
-  nameId: number;
-  openingDate: number;
-  populationId: number | null;
-  restrictedToLanguages: string;
-}
-
-export interface ServerSeasons {
+export interface ServerSeasonData {
   beginning: number;
   closure: number;
   flagObjectId: number;
@@ -1547,255 +1777,238 @@ export interface ServerSeasons {
   uid: number;
 }
 
-export interface Signs {
-  id: number;
-  paramsString: string;
-  skillId: number;
-  textKey: string | null;
+export interface SignsData {
+  id: string;
+  signs: string;
 }
 
-export interface SkillNames {
-  id: number;
-  nameId: number;
-}
-
-export interface Skills {
-  availableInHouse: number | null;
+export interface SkillData {
+  allowMarking: number;
+  availableInHouse: number;
   clientDisplay: number;
   cursor: number;
   elementActionId: number;
   gatheredRessourceItem: number;
-  id: number;
-  interactiveId: number;
-  isForgemagus: number | null;
+  id: Generated<number>;
+  isForgemagus: number;
   levelMin: number;
   nameId: number;
   parentJobId: number;
   range: number;
   useAnimation: string;
-  useRangeInClient: number | null;
+  useRangeInClient: number;
 }
 
-export interface SkillsCraftableItemIdsJunction {
-  Skills_id: number | null;
+export interface SkillDataCraftableItemIdsJunction {
+  SkillData_id: number | null;
   target_id: number | null;
 }
 
-export interface SkillsModifiableItemTypeIdsJunction {
-  Skills_id: number | null;
+export interface SkillDataModifiableItemTypeIdsJunction {
+  SkillData_id: number | null;
   target_id: number | null;
 }
 
-export interface SkinMappings {
-  id: number;
+export interface SkillNameData {
+  id: Generated<number>;
+  nameId: number;
+}
+
+export interface SkinMappingData {
+  id: Generated<number>;
   lowDefId: number;
 }
 
-export interface SkinSlotsRules {
+export interface SkinSlotRuleData {
   id: string;
-  skinId: number | null;
+  skinId: number;
   slotRulesList: string;
 }
 
-export interface SmileyCategories {
+export interface SmileyData {
+  categoryId: number;
+  forPlayers: number;
   gfxId: string;
-  id: number;
-  isFake: number;
+  id: Generated<number>;
   order: number;
+  referenceId: number;
 }
 
-export interface SmileyPacks {
-  id: number;
+export interface SmileyPackData {
+  id: Generated<number>;
   nameId: number;
   order: number;
   smileys: string;
 }
 
-export interface Smileys {
-  categoryId: number;
-  forPlayers: number;
-  gfxId: string;
-  id: number;
-  order: number;
-  referenceId: number | null;
-  triggers: string;
-}
-
-export interface SocialRights {
+export interface SocialRightData {
   groupId: number;
   id: number;
   nameId: number;
-  order: number | null;
+  order: number;
+  source: string;
 }
 
-export interface SoundBones {
+export interface SoundBoneData {
   animSounds: string;
   id: string;
 }
 
-export interface SoundUi {
-  closeFile: string | null;
-  id: number;
-  openFile: string | null;
-  uiName: string;
-}
-
-export interface SoundUiHook {
-  id: number;
-  name: string;
-}
-
-export interface SpeakingItemsText {
+export interface SpeakingItemTextData {
   id: string;
   textId: number;
   textLevel: number;
   textProba: number;
-  textRestriction: string | null;
+  textRestriction: string;
   textSound: number;
   textStringId: string;
 }
 
-export interface SpeakingItemsTriggers {
+export interface SpeakingItemTriggerData {
   id: string;
-  states: string;
-  triggersId: number;
 }
 
-export interface SpeakingItemsTriggersTextIdsJunction {
-  SpeakingItemsTriggers_id: number | null;
+export interface SpeakingItemTriggerDataTextIdsJunction {
+  SpeakingItemTriggerData_id: number | null;
   target_id: number | null;
 }
 
-export interface SpellBombs {
+export interface SpellBombData {
   chainReactionSpellId: number;
   comboCoeff: number;
   explodSpellId: number;
-  id: number;
+  id: Generated<number>;
   instantSpellId: number;
   wallId: number;
 }
 
-export interface SpellConversions {
-  id: string;
-  newSpellId: number;
-  oldSpellId: number;
+export interface SpellBombWallData {
+  color: number;
+  id: Generated<number>;
+  linear: number;
+  maxHop: number;
+  minHop: number;
+  spellId: number;
 }
 
-export interface SpellLevels {
+export interface SpellData {
+  adminName: string;
+  basePreviewZoneDescr: string;
+  boundScriptUsageData: string;
+  criticalHitBoundScriptUsageData: string;
+  descriptionId: number;
+  iconId: number;
+  id: Generated<number>;
+  m_flags: number;
+  nameId: number;
+  order: number;
+  scriptId: number;
+  scriptIdCritical: number;
+  scriptParams: string;
+  scriptParamsCritical: string;
+  spellLevels: string;
+  typeId: number;
+}
+
+export interface SpellLevelData {
   apCost: number;
   criticalEffect: string;
   criticalHitProbability: number;
   effects: string;
-  globalCooldown: number | null;
+  globalCooldown: number;
   grade: number;
-  id: number;
-  initialCooldown: number | null;
+  id: Generated<number>;
+  initialCooldown: number;
   m_flags: number;
   maxCastPerTarget: number;
-  maxCastPerTurn: number | null;
-  maxStack: number | null;
-  minCastInterval: number | null;
-  minPlayerLevel: number | null;
+  maxCastPerTurn: number;
+  maxGlobalCastPerTarget: number;
+  maxGlobalCastPerTurn: number;
+  maxStack: number;
+  minCastInterval: number;
+  minPlayerLevel: number;
   minRange: number;
   previewZones: string;
   range: number;
   spellBreed: number;
   spellId: number;
-  statesCriterion: string | null;
+  statesCriterion: string;
 }
 
-export interface SpellPairs {
+export interface SpellPairData {
   descriptionId: number;
   iconId: number;
-  id: number;
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface Spells {
-  adminName: string | null;
-  basePreviewZoneDescr: string;
-  boundScriptUsageData: string;
-  criticalHitBoundScriptUsageData: string;
-  descriptionId: number;
-  iconId: number | null;
-  id: number;
-  m_flags: number;
-  nameId: number;
-  order: number | null;
-  scriptId: number | null;
-  scriptIdCritical: number | null;
-  scriptParams: string | null;
-  scriptParamsCritical: string | null;
-  spellLevels: string;
-  typeId: number;
-}
-
-export interface SpellScripts {
+export interface SpellScriptData {
   id: string;
   rawParams: string;
   type: number;
 }
 
-export interface SpellStates {
-  cantBeMoved: number | null;
-  cantBePushed: number | null;
-  cantBeTackled: number | null;
-  cantDealDamage: number | null;
-  cantSwitchPosition: number | null;
-  cantTackle: number | null;
-  displayTurnRemaining: number | null;
-  icon: string | null;
-  iconVisibilityMask: number | null;
-  id: number;
-  incurable: number | null;
-  invulnerable: number | null;
-  invulnerableMelee: number | null;
-  invulnerableRange: number | null;
-  isMainState: number | null;
-  isSilent: number | null;
+export interface SpellStateData {
+  cantBeMoved: number;
+  cantBePushed: number;
+  cantBeTackled: number;
+  cantDealDamage: number;
+  cantSwitchPosition: number;
+  cantTackle: number;
+  displayTurnRemaining: number;
+  icon: string;
+  iconVisibilityMask: number;
+  id: Generated<number>;
+  incurable: number;
+  invulnerable: number;
+  invulnerableMelee: number;
+  invulnerableRange: number;
+  isMainState: number;
+  isSilent: number;
   nameId: number;
-  preventsFight: number | null;
-  preventsSpellCast: number | null;
+  preventsFight: number;
+  preventsSpellCast: number;
 }
 
-export interface SpellStatesEffectsIdsJunction {
-  SpellStates_id: number | null;
+export interface SpellStateDataEffectsIdsJunction {
+  SpellStateData_id: number | null;
   target_id: number | null;
 }
 
-export interface SpellTypes {
-  id: number;
+export interface SpellTypeData {
+  id: Generated<number>;
   longNameId: string;
   shortNameId: string;
 }
 
-export interface SpellVariants {
+export interface SpellVariantData {
   breedId: number;
-  id: number;
+  id: Generated<number>;
 }
 
-export interface SpellVariantsSpellIdsJunction {
-  SpellVariants_id: number | null;
+export interface SpellVariantDataSpellIdsJunction {
+  SpellVariantData_id: number | null;
   target_id: number | null;
 }
 
-export interface StealthBones {
-  id: number;
+export interface StealthBoneData {
+  id: Generated<number>;
 }
 
-export interface SubAreas {
+export interface SubAreaData {
   achievements: string;
-  areaId: number | null;
+  areaId: number;
   associatedZaapMapId: number;
-  basicAccountAllowed: number | null;
+  basicAccountAllowed: number;
   bounds: string;
   capturable: number;
-  customWorldMap: string;
+  customWorldMapId: number;
   displayOnWorldMap: number;
-  exploreAchievementId: number | null;
+  dungeonId: number;
+  exploreAchievementId: number;
   harvestables: string;
-  id: number;
-  isConquestVillage: number | null;
+  id: Generated<number>;
+  isConquestVillage: number;
   level: number;
   monsters: string;
   mountAutoTripAllowed: number;
@@ -1806,127 +2019,98 @@ export interface SubAreas {
   shape: string;
 }
 
-export interface SubAreasEntranceMapIdsJunction {
-  SubAreas_id: number | null;
+export interface SubAreaDataEntranceMapIdsJunction {
+  SubAreaData_id: number | null;
   target_id: number | null;
 }
 
-export interface SubAreasExitMapIdsJunction {
-  SubAreas_id: number | null;
+export interface SubAreaDataExitMapIdsJunction {
+  SubAreaData_id: number | null;
   target_id: number | null;
 }
 
-export interface SubAreasMapIdsJunction {
-  SubAreas_id: number | null;
+export interface SubAreaDataMapIdsJunction {
+  SubAreaData_id: number | null;
   target_id: number | null;
 }
 
-export interface Subhints {
-  hintAnchor: number | null;
-  hintAnchoredElement: string;
-  hintCreationDate: number;
-  hintHeight: number;
-  hintHighlightedElement: string;
-  hintId: number;
-  hintOrder: number;
-  hintParentUid: string;
-  hintPositionX: number | null;
-  hintPositionY: number | null;
-  hintTooltipOffsetX: number;
-  hintTooltipOffsetY: number;
-  hintTooltipPositionEnum: number;
-  hintTooltipText: string;
-  hintTooltipUrl: string | null;
-  hintTooltipWidth: number;
-  hintWidth: number;
-  id: string;
-}
-
-export interface SuperAreas {
+export interface SuperAreaData {
   hasWorldMap: number;
-  id: number;
+  id: Generated<number>;
   nameId: number;
   worldmapId: number;
 }
 
-export interface TaxCollectorFirstnames {
+export interface TaxCollectorFirstnameData {
   firstnameId: string;
-  id: number;
+  id: Generated<number>;
 }
 
-export interface TaxCollectorNames {
-  id: number;
+export interface TaxCollectorNameData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface TextIconReferences {
-  gfxId: string;
-  id: number;
+export interface TextIconReferenceData {
+  id: string;
   referenceKey: string;
 }
 
-export interface Tips {
-  descId: string;
-  id: number;
-}
-
-export interface TitleCategories {
-  id: number;
+export interface TitleCategoryData {
+  id: Generated<number>;
   nameId: number;
 }
 
-export interface Titles {
+export interface TitleData {
   categoryId: number;
-  id: number;
+  id: Generated<number>;
   nameFemaleId: string;
   nameMaleId: string;
-  visible: number | null;
+  visible: number;
 }
 
 export interface Translations {
-  id: string | null;
-  lang: string | null;
+  id: number;
+  lang: string;
   value: string | null;
 }
 
-export interface VeteranRewards {
-  id: number;
+export interface VeteranRewardData {
+  id: Generated<number>;
   itemGID: number;
   itemQuantity: number;
   requiredSubDays: number;
 }
 
-export interface Waypoints {
+export interface WaypointData {
   activated: number;
-  id: number;
+  id: Generated<number>;
   mapId: number;
   subAreaId: number;
 }
 
-export interface Weapons {
+export interface WeaponData {
   apCost: number;
-  appearanceId: number | null;
-  castInDiagonal: number | null;
-  castInLine: number | null;
-  castTestLos: number | null;
-  changeVersion: string | null;
-  craftConditional: string | null;
-  craftFeasible: string;
-  craftVisible: string;
+  appearanceId: number;
+  castInDiagonal: number;
+  castInLine: number;
+  castTestLos: number;
+  craftConditionalCriterion: string;
+  craftFeasibleCriterion: string;
+  craftVisibleCriterion: string;
   craftXpRatio: number;
-  criteria: string | null;
-  criteriaTarget: string | null;
-  criticalFailureProbability: number | null;
+  criterions: string;
+  criterionsTarget: string;
   criticalHitBonus: number;
   criticalHitProbability: number;
   descriptionId: number;
   favoriteRecyclingSubareas: string;
   favoriteSubAreas: string;
-  favoriteSubAreasBonus: number | null;
+  favoriteSubAreasBonus: number;
   iconId: number;
-  id: number;
-  importantNoticeId: string | null;
-  isColorable: number | null;
+  id: Generated<number>;
+  importantNoticeId: string;
+  isColorable: number;
   itemSetId: number;
   level: number;
   m_flags: number;
@@ -1938,54 +2122,115 @@ export interface Weapons {
   range: number;
   realWeight: number;
   recipeSlots: number;
-  recyclingNuggets: number | null;
+  recyclingNuggets: number;
   resourcesBySubarea: string;
-  tooltipExpirationDate: string;
   typeId: number;
-  useAnimationId: number;
-  visibility: string | null;
+  visibilityCriterion: string;
 }
 
-export interface WeaponsDropMonsterIdsJunction {
+export interface WeaponDataDropMonsterIdsJunction {
   target_id: number | null;
-  Weapons_id: number | null;
+  WeaponData_id: number | null;
 }
 
-export interface WeaponsDropTemporisMonsterIdsJunction {
+export interface WeaponDataDropTemporisMonsterIdsJunction {
   target_id: number | null;
-  Weapons_id: number | null;
+  WeaponData_id: number | null;
 }
 
-export interface WeaponsEvolutiveEffectIdsJunction {
+export interface WeaponDataEvolutiveEffectIdsJunction {
   target_id: number | null;
-  Weapons_id: number | null;
+  WeaponData_id: number | null;
 }
 
-export interface WeaponsRecipeIdsJunction {
+export interface WeaponDataRecipeIdsJunction {
   target_id: number | null;
-  Weapons_id: number | null;
+  WeaponData_id: number | null;
 }
 
-export interface WorldEvents {
+export interface WorldEventData {
   areas: string;
   categoryId: number;
   deletedObjects: string;
+  descriptionId: number;
   dungeonHunterGroupsPerMap: number;
+  duration: number;
   endMsgId: number;
   fightScenarios: string;
   globalDrops: string;
-  id: number;
+  id: Generated<number>;
+  level: number;
   monsterHunterGroupsPerMap: number;
   nameId: number;
   preMsgDelay: number;
   preMsgId: number;
-  scoreMsgTiming: number;
   startMsgId: number;
   subareas: string;
+  worldEventDataType: number;
+  worldEventEventId: number;
+  worldEventRewardId: number;
 }
 
-export interface WorldMaps {
-  id: number;
+export interface WorldEventDungeonData {
+  dungeonId: number;
+  dungeonMapIdTeleport: number;
+  id: string;
+  scoreGroupShared: number;
+  scorePerDamage: number;
+  scorePerDungeon: number;
+}
+
+export interface WorldEventFarmingSimulatorData {
+  id: string;
+  scorePerHarvest: number;
+}
+
+export interface WorldEventMonstersHunterData {
+  areaList: string;
+  criterion: string;
+  id: string;
+  mapList: string;
+  monsterList: string;
+  scoreGroupShared: number;
+  scorePerDamage: number;
+  scorePerMonster: number;
+  subareaList: string;
+}
+
+export interface WorldEventRewardData {
+  criterions: string;
+  emotes: string;
+  experience: number;
+  gameaction: number;
+  guildPoints: number;
+  id: string;
+  isForTeam: number;
+  kamas: number;
+  objects: string;
+  order: number;
+  ornaments: string;
+  rankingConditions: string;
+  spells: string;
+  titles: string;
+  worldEventRewardId: number;
+}
+
+export interface WorldEventWorldBossesData {
+  areaList: string;
+  criterion: string;
+  id: string;
+  mapList: string;
+  monsterList: string;
+  scoreDayCount: number;
+  scoreGroupShared: number;
+  scorePerDamage: number;
+  scoreRatio: number;
+  scoreTotal: number;
+  subareaList: string;
+}
+
+export interface WorldMapData {
+  id: Generated<number>;
   mapHeight: number;
   mapWidth: number;
   maxScale: number;
@@ -1996,242 +2241,257 @@ export interface WorldMaps {
   startScale: number;
   totalHeight: number;
   totalWidth: number;
-  viewableEverywhere: number;
   visibleOnMap: number;
   zoom: string;
 }
 
 export interface DB {
-  AbuseReasons: AbuseReasons;
-  AchievementCategories: AchievementCategories;
-  AchievementCategories_achievementIds_junction: AchievementCategoriesAchievementIdsJunction;
-  AchievementObjectives: AchievementObjectives;
-  AchievementProgress: AchievementProgress;
-  AchievementProgressSteps: AchievementProgressSteps;
-  AchievementRewards: AchievementRewards;
-  Achievements: Achievements;
-  Achievements_objectiveIds_junction: AchievementsObjectiveIdsJunction;
-  Achievements_rewardIds_junction: AchievementsRewardIdsJunction;
-  ActionFilters: ActionFilters;
-  ActivitySuggestions: ActivitySuggestions;
-  ActivitySuggestionsCategories: ActivitySuggestionsCategories;
-  AlignmentGift: AlignmentGift;
-  AlignmentOrder: AlignmentOrder;
-  AlignmentRank: AlignmentRank;
-  AlignmentRankJntGift: AlignmentRankJntGift;
-  AlignmentSides: AlignmentSides;
-  AlignmentTitles: AlignmentTitles;
-  AllianceRankNameSuggestions: AllianceRankNameSuggestions;
-  AllianceRanks: AllianceRanks;
-  AllianceRightGroups: AllianceRightGroups;
-  AllianceRights: AllianceRights;
-  AllianceTags: AllianceTags;
-  AllianceTagsTypes: AllianceTagsTypes;
-  AlmanaxCalendars: AlmanaxCalendars;
-  AlmanaxCalendars_bonusesIds_junction: AlmanaxCalendarsBonusesIdsJunction;
-  AlterationCategories: AlterationCategories;
-  Alterations: Alterations;
-  Appearances: Appearances;
-  Areas: Areas;
-  ArenaLeagueRewards: ArenaLeagueRewards;
-  ArenaLeagues: ArenaLeagues;
-  ArenaLeagueSeasons: ArenaLeagueSeasons;
-  Bonuses: Bonuses;
-  Bonuses_criterionsIds_junction: BonusesCriterionsIdsJunction;
-  BonusesAreaCriterion: BonusesAreaCriterion;
-  BonusesCriterions: BonusesCriterions;
-  BonusesEquippedItemCriterion: BonusesEquippedItemCriterion;
-  BonusesMonsterCriterion: BonusesMonsterCriterion;
-  BonusesMonsterFamilyCriterion: BonusesMonsterFamilyCriterion;
-  BonusesQuestCategoryCriterion: BonusesQuestCategoryCriterion;
-  BonusesSubAreaCriterion: BonusesSubAreaCriterion;
-  BreachBosses: BreachBosses;
-  BreachDungeonModificators: BreachDungeonModificators;
-  BreachInfinityLevels: BreachInfinityLevels;
-  BreachPrizes: BreachPrizes;
-  BreachWorldMapCoordinates: BreachWorldMapCoordinates;
-  BreachWorldMapSectors: BreachWorldMapSectors;
-  BreedRoles: BreedRoles;
-  Breeds: Breeds;
-  CensoredContents: CensoredContents;
-  CensoredWords: CensoredWords;
-  Challenges: Challenges;
-  CharacteristicCategories: CharacteristicCategories;
-  CharacteristicCategories_characteristicIds_junction: CharacteristicCategoriesCharacteristicIdsJunction;
-  Characteristics: Characteristics;
-  CharacterXPMappings: CharacterXPMappings;
-  ChatChannels: ChatChannels;
-  Choices: Choices;
-  Collectables: Collectables;
-  Collections: Collections;
-  CompanionCharacteristics: CompanionCharacteristics;
-  Companions: Companions;
-  CompanionSpells: CompanionSpells;
-  CreatureBonesOverrides: CreatureBonesOverrides;
-  CreatureBonesTypes: CreatureBonesTypes;
-  CustomModeBreedSpells: CustomModeBreedSpells;
-  Documents: Documents;
-  Dungeons: Dungeons;
-  Dungeons_mapIds_junction: DungeonsMapIdsJunction;
+  AchievementCategoryData: AchievementCategoryData;
+  AchievementCategoryData_achievementIds_junction: AchievementCategoryDataAchievementIdsJunction;
+  AchievementData: AchievementData;
+  AchievementData_objectiveIds_junction: AchievementDataObjectiveIdsJunction;
+  AchievementData_rewardIds_junction: AchievementDataRewardIdsJunction;
+  AchievementObjectiveData: AchievementObjectiveData;
+  AchievementRewardData: AchievementRewardData;
+  ActionFilterData: ActionFilterData;
+  ActivitySuggestionCategoryData: ActivitySuggestionCategoryData;
+  ActivitySuggestionData: ActivitySuggestionData;
+  AlignmentGiftData: AlignmentGiftData;
+  AlignmentOrderData: AlignmentOrderData;
+  AlignmentRankData: AlignmentRankData;
+  AlignmentRankGiftsData: AlignmentRankGiftsData;
+  AlignmentSideData: AlignmentSideData;
+  AlignmentTitleData: AlignmentTitleData;
+  AllianceRankData: AllianceRankData;
+  AllianceRankNameSuggestionData: AllianceRankNameSuggestionData;
+  AllianceRightData: AllianceRightData;
+  AllianceRightGroupData: AllianceRightGroupData;
+  AllianceTagData: AllianceTagData;
+  AllianceTagTypeData: AllianceTagTypeData;
+  AlmanaxCalendarData: AlmanaxCalendarData;
+  AlmanaxCalendarData_bonusesIds_junction: AlmanaxCalendarDataBonusesIdsJunction;
+  AlmanaxCategoryData: AlmanaxCategoryData;
+  AlmanaxZodiacData: AlmanaxZodiacData;
+  AlterationCategoryData: AlterationCategoryData;
+  AlterationData: AlterationData;
+  AppearanceData: AppearanceData;
+  AreaData: AreaData;
+  AreaData_subareaIds_junction: AreaDataSubareaIdsJunction;
+  ArenaLeagueData: ArenaLeagueData;
+  ArenaLeagueSeasonData: ArenaLeagueSeasonData;
+  AuctionHouseData: AuctionHouseData;
+  BodyData: BodyData;
+  BonusCriterionData: BonusCriterionData;
+  BonusData: BonusData;
+  BonusData_criterionsIds_junction: BonusDataCriterionsIdsJunction;
+  BreachBossData: BreachBossData;
+  BreachDungeonModificatorData: BreachDungeonModificatorData;
+  BreachPrizeData: BreachPrizeData;
+  BreachWorldMapCoordinateData: BreachWorldMapCoordinateData;
+  BreachWorldMapSectorData: BreachWorldMapSectorData;
+  BreedData: BreedData;
+  BreedRoleData: BreedRoleData;
+  CalendarEventData: CalendarEventData;
+  CardBackgroundData: CardBackgroundData;
+  ChallengeData: ChallengeData;
+  CharacteristicCategoryData: CharacteristicCategoryData;
+  CharacteristicCategoryData_characteristicIds_junction: CharacteristicCategoryDataCharacteristicIdsJunction;
+  CharacteristicData: CharacteristicData;
+  CharacterXpMappingData: CharacterXpMappingData;
+  ChatChannelData: ChatChannelData;
+  ChoiceData: ChoiceData;
+  CollectableData: CollectableData;
+  CollectionData: CollectionData;
+  CompanionCharacteristicData: CompanionCharacteristicData;
+  CompanionData: CompanionData;
+  CompanionSpellData: CompanionSpellData;
+  ConstantData: ConstantData;
+  CreatureBoneOverrideData: CreatureBoneOverrideData;
+  CreatureBoneTypeData: CreatureBoneTypeData;
+  CustomModeBreedSpellData: CustomModeBreedSpellData;
+  DocumentData: DocumentData;
+  DofusProgressionData: DofusProgressionData;
+  DungeonData: DungeonData;
+  DungeonData_mapIds_junction: DungeonDataMapIdsJunction;
+  EffectData: EffectData;
   EffectInstanceDice: EffectInstanceDice;
-  Effects: Effects;
-  EmblemBackgrounds: EmblemBackgrounds;
-  EmblemSymbolCategories: EmblemSymbolCategories;
-  EmblemSymbols: EmblemSymbols;
-  Emoticons: Emoticons;
-  EvolutiveEffects: EvolutiveEffects;
-  EvolutiveItemTypes: EvolutiveItemTypes;
-  ExpeditionSeasons: ExpeditionSeasons;
-  ExternalNotifications: ExternalNotifications;
-  FeatureDescriptions: FeatureDescriptions;
-  FightScenarios: FightScenarios;
-  FinishMoves: FinishMoves;
-  ForgettableSpells: ForgettableSpells;
-  GuildChestTabs: GuildChestTabs;
-  GuildRankNameSuggestions: GuildRankNameSuggestions;
-  GuildRanks: GuildRanks;
-  GuildRightGroups: GuildRightGroups;
-  GuildRights: GuildRights;
-  GuildTags: GuildTags;
-  GuildTagsTypes: GuildTagsTypes;
-  HavenbagFurnitures: HavenbagFurnitures;
-  HavenbagThemes: HavenbagThemes;
-  Heads: Heads;
-  HintCategory: HintCategory;
-  Hints: Hints;
-  Houses: Houses;
-  IncarnationLevels: IncarnationLevels;
-  InfoMessages: InfoMessages;
-  Interactives: Interactives;
-  Items: Items;
-  Items_dropMonsterIds_junction: ItemsDropMonsterIdsJunction;
-  Items_dropTemporisMonsterIds_junction: ItemsDropTemporisMonsterIdsJunction;
-  Items_evolutiveEffectIds_junction: ItemsEvolutiveEffectIdsJunction;
-  Items_recipeIds_junction: ItemsRecipeIdsJunction;
-  ItemSets: ItemSets;
-  ItemSuperTypes: ItemSuperTypes;
-  ItemTypes: ItemTypes;
-  Jobs: Jobs;
-  KothRoles: KothRoles;
-  LegendaryPowersCategories: LegendaryPowersCategories;
-  LegendaryTreasureHunts: LegendaryTreasureHunts;
-  LivingObjectSkinJntMood: LivingObjectSkinJntMood;
-  LuaFormulas: LuaFormulas;
-  MapCoordinates: MapCoordinates;
-  MapCoordinates_mapIds_junction: MapCoordinatesMapIdsJunction;
-  MapPositions: MapPositions;
-  MapReferences: MapReferences;
-  MapScrollActions: MapScrollActions;
-  Modsters: Modsters;
-  MonsterDropChanceBonus: MonsterDropChanceBonus;
-  MonsterDropChanceBonus_criterionsIds_junction: MonsterDropChanceBonusCriterionsIdsJunction;
-  MonsterMiniBoss: MonsterMiniBoss;
-  MonsterRaces: MonsterRaces;
-  Monsters: Monsters;
-  MonsterSuperRaces: MonsterSuperRaces;
-  MonsterXPBonus: MonsterXPBonus;
-  MonsterXPBonus_criterionsIds_junction: MonsterXPBonusCriterionsIdsJunction;
-  Months: Months;
-  MountBehaviors: MountBehaviors;
-  MountBones: MountBones;
-  MountFamily: MountFamily;
-  Mounts: Mounts;
-  NamingRules: NamingRules;
-  Notifications: Notifications;
-  NpcActions: NpcActions;
-  NpcMessages: NpcMessages;
-  Npcs: Npcs;
-  OptionalFeatures: OptionalFeatures;
-  Ornaments: Ornaments;
-  Pack: Pack;
-  Playlists: Playlists;
-  PointOfInterest: PointOfInterest;
-  PointOfInterestCategory: PointOfInterestCategory;
-  PopupInformations: PopupInformations;
-  PresetIcons: PresetIcons;
-  QuestCategory: QuestCategory;
-  QuestCategory_questIds_junction: QuestCategoryQuestIdsJunction;
-  QuestKamasBonus: QuestKamasBonus;
-  QuestKamasBonus_criterionsIds_junction: QuestKamasBonusCriterionsIdsJunction;
-  QuestObjectiveBringItemToNpc: QuestObjectiveBringItemToNpc;
-  QuestObjectiveBringSoulToNpc: QuestObjectiveBringSoulToNpc;
-  QuestObjectiveCraftItem: QuestObjectiveCraftItem;
-  QuestObjectiveDiscoverMap: QuestObjectiveDiscoverMap;
-  QuestObjectiveDiscoverSubArea: QuestObjectiveDiscoverSubArea;
-  QuestObjectiveFightMonster: QuestObjectiveFightMonster;
-  QuestObjectiveFightMonstersOnMap: QuestObjectiveFightMonstersOnMap;
-  QuestObjectiveFreeForm: QuestObjectiveFreeForm;
-  QuestObjectiveGoToNpc: QuestObjectiveGoToNpc;
-  QuestObjectiveMultiFightMonster: QuestObjectiveMultiFightMonster;
-  QuestObjectiveTypes: QuestObjectiveTypes;
-  Quests: Quests;
-  Quests_stepIds_junction: QuestsStepIdsJunction;
-  QuestStepRewards: QuestStepRewards;
-  QuestSteps: QuestSteps;
-  QuestSteps_objectiveIds_junction: QuestStepsObjectiveIdsJunction;
-  QuestSteps_rewardsIds_junction: QuestStepsRewardsIdsJunction;
-  QuestXPBonus: QuestXPBonus;
-  QuestXPBonus_criterionsIds_junction: QuestXPBonusCriterionsIdsJunction;
-  RandomDropGroups: RandomDropGroups;
-  Recipes: Recipes;
-  Recipes_ingredientIds_junction: RecipesIngredientIdsJunction;
-  RideFood: RideFood;
-  ServerCommunities: ServerCommunities;
-  ServerCommunities_supportedLangIds_junction: ServerCommunitiesSupportedLangIdsJunction;
-  ServerGameTypes: ServerGameTypes;
-  ServerLangs: ServerLangs;
-  ServerPopulations: ServerPopulations;
-  Servers: Servers;
-  ServerSeasons: ServerSeasons;
-  Signs: Signs;
-  SkillNames: SkillNames;
-  Skills: Skills;
-  Skills_craftableItemIds_junction: SkillsCraftableItemIdsJunction;
-  Skills_modifiableItemTypeIds_junction: SkillsModifiableItemTypeIdsJunction;
-  SkinMappings: SkinMappings;
-  SkinSlotsRules: SkinSlotsRules;
-  SmileyCategories: SmileyCategories;
-  SmileyPacks: SmileyPacks;
-  Smileys: Smileys;
-  SocialRights: SocialRights;
-  SoundBones: SoundBones;
-  SoundUi: SoundUi;
-  SoundUiHook: SoundUiHook;
-  SpeakingItemsText: SpeakingItemsText;
-  SpeakingItemsTriggers: SpeakingItemsTriggers;
-  SpeakingItemsTriggers_textIds_junction: SpeakingItemsTriggersTextIdsJunction;
-  SpellBombs: SpellBombs;
-  SpellConversions: SpellConversions;
-  SpellLevels: SpellLevels;
-  SpellPairs: SpellPairs;
-  Spells: Spells;
-  SpellScripts: SpellScripts;
-  SpellStates: SpellStates;
-  SpellStates_effectsIds_junction: SpellStatesEffectsIdsJunction;
-  SpellTypes: SpellTypes;
-  SpellVariants: SpellVariants;
-  SpellVariants_spellIds_junction: SpellVariantsSpellIdsJunction;
-  StealthBones: StealthBones;
-  SubAreas: SubAreas;
-  SubAreas_entranceMapIds_junction: SubAreasEntranceMapIdsJunction;
-  SubAreas_exitMapIds_junction: SubAreasExitMapIdsJunction;
-  SubAreas_mapIds_junction: SubAreasMapIdsJunction;
-  Subhints: Subhints;
-  SuperAreas: SuperAreas;
-  TaxCollectorFirstnames: TaxCollectorFirstnames;
-  TaxCollectorNames: TaxCollectorNames;
-  TextIconReferences: TextIconReferences;
-  Tips: Tips;
-  TitleCategories: TitleCategories;
-  Titles: Titles;
+  EmblemBackgroundData: EmblemBackgroundData;
+  EmblemSymbolCategoryData: EmblemSymbolCategoryData;
+  EmblemSymbolData: EmblemSymbolData;
+  EmoticonData: EmoticonData;
+  EvolutiveEffectData: EvolutiveEffectData;
+  EvolutiveItemTypeData: EvolutiveItemTypeData;
+  ExpeditionSeasonData: ExpeditionSeasonData;
+  ExternalNotificationData: ExternalNotificationData;
+  FeatureDescriptionData: FeatureDescriptionData;
+  FightScenarioData: FightScenarioData;
+  ForgettableSpellData: ForgettableSpellData;
+  GuildChestTabData: GuildChestTabData;
+  GuildHallData: GuildHallData;
+  GuildHallThemeData: GuildHallThemeData;
+  GuildLevelRewardData: GuildLevelRewardData;
+  GuildMissionActivityData: GuildMissionActivityData;
+  GuildMissionActivityData_milestonesIds_junction: GuildMissionActivityDataMilestonesIdsJunction;
+  GuildMissionData: GuildMissionData;
+  GuildMissionGradeData: GuildMissionGradeData;
+  GuildMissionMilestoneData: GuildMissionMilestoneData;
+  GuildMissionObjectiveData: GuildMissionObjectiveData;
+  GuildMissionRankData: GuildMissionRankData;
+  GuildMissionSuperCategoryData: GuildMissionSuperCategoryData;
+  GuildRaidData: GuildRaidData;
+  GuildRaidsGoalData: GuildRaidsGoalData;
+  GuildRaidsGroupData: GuildRaidsGroupData;
+  GuildRaidsLaddersRewardData: GuildRaidsLaddersRewardData;
+  GuildRaidsReward: GuildRaidsReward;
+  GuildRankData: GuildRankData;
+  GuildRankNameSuggestionData: GuildRankNameSuggestionData;
+  GuildRightData: GuildRightData;
+  GuildRightGroupData: GuildRightGroupData;
+  GuildShopBoostData: GuildShopBoostData;
+  GuildTagData: GuildTagData;
+  GuildTagTypeData: GuildTagTypeData;
+  HavenbagFurnitureData: HavenbagFurnitureData;
+  HavenbagThemeData: HavenbagThemeData;
+  HeadData: HeadData;
+  HintCategoryData: HintCategoryData;
+  HintData: HintData;
+  HouseData: HouseData;
+  IdleData: IdleData;
+  InfiniteDreamIntensityData: InfiniteDreamIntensityData;
+  InfiniteDreamRewardActionData: InfiniteDreamRewardActionData;
+  InfiniteDreamRewardData: InfiniteDreamRewardData;
+  InfiniteDreamTrialData: InfiniteDreamTrialData;
+  InfoMessageData: InfoMessageData;
+  InteractiveData: InteractiveData;
+  ItemData: ItemData;
+  ItemData_dropMonsterIds_junction: ItemDataDropMonsterIdsJunction;
+  ItemData_dropTemporisMonsterIds_junction: ItemDataDropTemporisMonsterIdsJunction;
+  ItemData_evolutiveEffectIds_junction: ItemDataEvolutiveEffectIdsJunction;
+  ItemData_recipeIds_junction: ItemDataRecipeIdsJunction;
+  ItemSetData: ItemSetData;
+  ItemSuperTypeData: ItemSuperTypeData;
+  ItemTypeData: ItemTypeData;
+  JobData: JobData;
+  KothRoleData: KothRoleData;
+  LegendaryPowerCategoryData: LegendaryPowerCategoryData;
+  LegendaryTreasureHuntData: LegendaryTreasureHuntData;
+  LivingObjectSkinMoodsData: LivingObjectSkinMoodsData;
+  LobbyTagData: LobbyTagData;
+  LobbyTypeData: LobbyTypeData;
+  LuaFormulaData: LuaFormulaData;
+  MapInformationData: MapInformationData;
+  MapReferenceData: MapReferenceData;
+  MapsCoordinateData: MapsCoordinateData;
+  MapsCoordinateData_mapIds_junction: MapsCoordinateDataMapIdsJunction;
+  MapScrollActionData: MapScrollActionData;
+  ModsterData: ModsterData;
+  MonsterData: MonsterData;
+  MonsterMiniBossData: MonsterMiniBossData;
+  MonsterRaceData: MonsterRaceData;
+  MonsterSuperRaceData: MonsterSuperRaceData;
+  MonthData: MonthData;
+  MountBehaviorData: MountBehaviorData;
+  MountBoneData: MountBoneData;
+  MountData: MountData;
+  MountFamilyData: MountFamilyData;
+  NamingRuleData: NamingRuleData;
+  NotificationData: NotificationData;
+  NpcActionData: NpcActionData;
+  NpcData: NpcData;
+  NpcDialogSkinData: NpcDialogSkinData;
+  NpcMessageData: NpcMessageData;
+  OptionalFeatureData: OptionalFeatureData;
+  OrnamentData: OrnamentData;
+  PaddockGaugesData: PaddockGaugesData;
+  PaddocksData: PaddocksData;
+  PointOfInterestData: PointOfInterestData;
+  PopupInformationData: PopupInformationData;
+  PresetIconData: PresetIconData;
+  ProgressingAchievementSeasonData: ProgressingAchievementSeasonData;
+  ProgressingAchievementStepData: ProgressingAchievementStepData;
+  QuestCategoryData: QuestCategoryData;
+  QuestCategoryData_questIds_junction: QuestCategoryDataQuestIdsJunction;
+  QuestData: QuestData;
+  QuestData_stepIds_junction: QuestDataStepIdsJunction;
+  QuestObjectiveBringItemToNpcData: QuestObjectiveBringItemToNpcData;
+  QuestObjectiveBringSoulToNpcData: QuestObjectiveBringSoulToNpcData;
+  QuestObjectiveCraftItemData: QuestObjectiveCraftItemData;
+  QuestObjectiveDiscoverMapData: QuestObjectiveDiscoverMapData;
+  QuestObjectiveDiscoverSubAreaData: QuestObjectiveDiscoverSubAreaData;
+  QuestObjectiveFightMonsterData: QuestObjectiveFightMonsterData;
+  QuestObjectiveFightMonstersOnMapData: QuestObjectiveFightMonstersOnMapData;
+  QuestObjectiveFreeFormData: QuestObjectiveFreeFormData;
+  QuestObjectiveGoToNpcData: QuestObjectiveGoToNpcData;
+  QuestObjectiveMultiFightMonsterData: QuestObjectiveMultiFightMonsterData;
+  QuestObjectiveTypeData: QuestObjectiveTypeData;
+  QuestStepData: QuestStepData;
+  QuestStepData_objectiveIds_junction: QuestStepDataObjectiveIdsJunction;
+  QuestStepData_rewardsIds_junction: QuestStepDataRewardsIdsJunction;
+  QuestStepRewardData: QuestStepRewardData;
+  RandomDropGroupData: RandomDropGroupData;
+  RecipeData: RecipeData;
+  RecipeData_ingredientIds_junction: RecipeDataIngredientIdsJunction;
+  RideFoodData: RideFoodData;
+  RideGaugesData: RideGaugesData;
+  RiderBoneData: RiderBoneData;
+  RidesData: RidesData;
+  RideSpeciesData: RideSpeciesData;
+  ServerCommunityData: ServerCommunityData;
+  ServerCommunityData_supportedLangIds_junction: ServerCommunityDataSupportedLangIdsJunction;
+  ServerData: ServerData;
+  ServerGameTypeData: ServerGameTypeData;
+  ServerLangData: ServerLangData;
+  ServerPopulationData: ServerPopulationData;
+  ServerSeasonData: ServerSeasonData;
+  SignsData: SignsData;
+  SkillData: SkillData;
+  SkillData_craftableItemIds_junction: SkillDataCraftableItemIdsJunction;
+  SkillData_modifiableItemTypeIds_junction: SkillDataModifiableItemTypeIdsJunction;
+  SkillNameData: SkillNameData;
+  SkinMappingData: SkinMappingData;
+  SkinSlotRuleData: SkinSlotRuleData;
+  SmileyData: SmileyData;
+  SmileyPackData: SmileyPackData;
+  SocialRightData: SocialRightData;
+  SoundBoneData: SoundBoneData;
+  SpeakingItemTextData: SpeakingItemTextData;
+  SpeakingItemTriggerData: SpeakingItemTriggerData;
+  SpeakingItemTriggerData_textIds_junction: SpeakingItemTriggerDataTextIdsJunction;
+  SpellBombData: SpellBombData;
+  SpellBombWallData: SpellBombWallData;
+  SpellData: SpellData;
+  SpellLevelData: SpellLevelData;
+  SpellPairData: SpellPairData;
+  SpellScriptData: SpellScriptData;
+  SpellStateData: SpellStateData;
+  SpellStateData_effectsIds_junction: SpellStateDataEffectsIdsJunction;
+  SpellTypeData: SpellTypeData;
+  SpellVariantData: SpellVariantData;
+  SpellVariantData_spellIds_junction: SpellVariantDataSpellIdsJunction;
+  StealthBoneData: StealthBoneData;
+  SubAreaData: SubAreaData;
+  SubAreaData_entranceMapIds_junction: SubAreaDataEntranceMapIdsJunction;
+  SubAreaData_exitMapIds_junction: SubAreaDataExitMapIdsJunction;
+  SubAreaData_mapIds_junction: SubAreaDataMapIdsJunction;
+  SuperAreaData: SuperAreaData;
+  TaxCollectorFirstnameData: TaxCollectorFirstnameData;
+  TaxCollectorNameData: TaxCollectorNameData;
+  TextIconReferenceData: TextIconReferenceData;
+  TitleCategoryData: TitleCategoryData;
+  TitleData: TitleData;
   translations: Translations;
-  VeteranRewards: VeteranRewards;
-  Waypoints: Waypoints;
-  Weapons: Weapons;
-  Weapons_dropMonsterIds_junction: WeaponsDropMonsterIdsJunction;
-  Weapons_dropTemporisMonsterIds_junction: WeaponsDropTemporisMonsterIdsJunction;
-  Weapons_evolutiveEffectIds_junction: WeaponsEvolutiveEffectIdsJunction;
-  Weapons_recipeIds_junction: WeaponsRecipeIdsJunction;
-  WorldEvents: WorldEvents;
-  WorldMaps: WorldMaps;
+  VeteranRewardData: VeteranRewardData;
+  WaypointData: WaypointData;
+  WeaponData: WeaponData;
+  WeaponData_dropMonsterIds_junction: WeaponDataDropMonsterIdsJunction;
+  WeaponData_dropTemporisMonsterIds_junction: WeaponDataDropTemporisMonsterIdsJunction;
+  WeaponData_evolutiveEffectIds_junction: WeaponDataEvolutiveEffectIdsJunction;
+  WeaponData_recipeIds_junction: WeaponDataRecipeIdsJunction;
+  WorldEventData: WorldEventData;
+  WorldEventDungeonData: WorldEventDungeonData;
+  WorldEventFarmingSimulatorData: WorldEventFarmingSimulatorData;
+  WorldEventMonstersHunterData: WorldEventMonstersHunterData;
+  WorldEventRewardData: WorldEventRewardData;
+  WorldEventWorldBossesData: WorldEventWorldBossesData;
+  WorldMapData: WorldMapData;
 }

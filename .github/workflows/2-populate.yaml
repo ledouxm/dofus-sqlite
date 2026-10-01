@@ -104,6 +104,11 @@ jobs:
                   npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-maps/
                   --select **/StreamingAssets/Content/Map/Data/**/*.bundle
 
+            - name: Download picto bundles
+              run: >
+                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-picto/
+                  --select **/StreamingAssets/Content/Picto/**/*.bundle
+
             - name: Upload data-files artifact
               uses: actions/upload-artifact@v4
               with:
@@ -125,6 +130,15 @@ jobs:
                   path: parser/temp-maps/
                   retention-days: 1
 
+            - name: Upload picto-bundles artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: picto-bundles
+                  path: parser/temp-picto/
+                  retention-days: 1
+                  # bundles are already compressed
+                  compression-level: 0
+
     populate-data:
         name: Extract and Upload Data
         needs: setup
@@ -137,7 +151,7 @@ jobs:
             - name: Setup .NET
               uses: actions/setup-dotnet@v3
               with:
-                  dotnet-version: "7"
+                  dotnet-version: "8"
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -181,11 +195,10 @@ jobs:
               shell: pwsh
               run: |
                   $tag = "v${{ needs.setup.outputs.release_tag }}"
-                  $files = Get-ChildItem -Path "parser/json" -File
-                  foreach ($file in $files) {
-                      gh release upload $tag $file.FullName
-                  }
-                  gh release upload $tag parser/dofus.sqlite
+                  # Single call so a failed upload fails the step; --clobber allows re-populating a release
+                  $files = (Get-ChildItem -Path "parser/json" -File).FullName
+                  gh release upload $tag @files parser/dofus.sqlite --clobber
+                  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     il2cpp-proto:
         name: Generate Proto
@@ -217,7 +230,7 @@ jobs:
             - name: Upload proto to pre-release
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh release upload "v${{ needs.setup.outputs.release_tag }}" parser/dofus.proto
+              run: gh release upload "v${{ needs.setup.outputs.release_tag }}" parser/dofus.proto --clobber
 
     populate-maps:
         name: Extract and Upload Maps
@@ -231,7 +244,7 @@ jobs:
             - name: Setup .NET
               uses: actions/setup-dotnet@v3
               with:
-                  dotnet-version: "7"
+                  dotnet-version: "8"
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -269,11 +282,41 @@ jobs:
               shell: pwsh
               run: |
                   $tag = "v${{ needs.setup.outputs.release_tag }}"
-                  gh release upload $tag parser/maps.sqlite
+                  gh release upload $tag parser/maps.sqlite --clobber
+
+    populate-images:
+        name: Extract and Upload Images
+        needs: setup
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "8"
+
+            - name: Download picto-bundles artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: picto-bundles
+                  path: parser/temp-picto/
+
+            - name: Export images to zips
+              run: |
+                  dotnet build cs -c Release
+                  dotnet cs/bin/Release/net8.0/unity-bundle-unwrap.dll images parser/temp-picto parser/images
+
+            - name: Upload images to pre-release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: gh release upload "v${{ needs.setup.outputs.release_tag }}" parser/images/*.zip --clobber --repo "${{ github.repository }}"
 
     promote-release:
         name: Promote to Full Release
-        needs: [setup, populate-data, il2cpp-proto, populate-maps]
+        needs: [setup, populate-data, il2cpp-proto, populate-maps, populate-images]
         runs-on: ubuntu-latest
 
         steps:

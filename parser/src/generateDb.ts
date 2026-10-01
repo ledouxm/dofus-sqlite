@@ -38,21 +38,44 @@ const main = async () => {
   const db = new sqlite(DATABASE_URL);
   db.exec("PRAGMA journal_mode = WAL");
 
-  const files = await recursiveReadDir(JSON_FOLDER);
+  // Map bundles are parsed into maps.sqlite, they must not end up in dofus.sqlite
+  const files = (await recursiveReadDir(JSON_FOLDER)).filter(
+    (file) => file.endsWith(".json") && !path.basename(file).startsWith("mapdata_"),
+  );
+  const dataFiles = files.filter((file) => !path.basename(file).startsWith("i18n_"));
 
   const time = Date.now();
-  for (const file of files) {
-    if (!file.endsWith(".json")) continue;
+  const multiSourceClasses = await findMultiSourceClasses(dataFiles);
+  if (multiSourceClasses.size) {
+    console.log("classes stored in several files:", [...multiSourceClasses].join(", "));
+  }
 
-    if (file.includes("i18n_")) {
+  for (const file of files) {
+    if (path.basename(file).startsWith("i18n_")) {
       await generateTranslations(file, db);
     } else {
-      await createDatabaseFromJson(db, file);
+      await createDatabaseFromJson(db, file, multiSourceClasses);
     }
   }
 
   console.log("parsed", files.length, "files in", Date.now() - time, "ms");
   db.close();
+};
+
+// Cheap pre-pass (no JSON parsing) to know which classes need a "source" column
+// before their table is created
+const findMultiSourceClasses = async (files: string[]) => {
+  const classFiles = new Map<string, Set<string>>();
+
+  for (const file of files) {
+    const content = await fs.readFile(file, "utf8");
+    for (const match of content.matchAll(/"class":\s*"([^"]+)"/g)) {
+      if (!classFiles.has(match[1])) classFiles.set(match[1], new Set());
+      classFiles.get(match[1])!.add(file);
+    }
+  }
+
+  return new Set([...classFiles].filter(([, files]) => files.size > 1).map(([className]) => className));
 };
 
 const recursiveReadDir = async (dir: string): Promise<string[]> => {
@@ -66,4 +89,7 @@ const recursiveReadDir = async (dir: string): Promise<string[]> => {
   return Array.prototype.concat(...files);
 };
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

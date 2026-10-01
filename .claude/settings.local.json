@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(gh run *)",
+      "Bash(python3 -c \"import yaml,sys; yaml.safe_load\\(open\\('.github/workflows/2-populate.yaml'\\)\\); print\\('OK'\\)\")",
+      "Bash(python -c \"import yaml,sys; yaml.safe_load\\(open\\('.github/workflows/2-populate.yaml'\\)\\); print\\('OK'\\)\")"
     ]
   }
 }

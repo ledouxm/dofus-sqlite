@@ -7,12 +7,13 @@ const dialect = new SqliteDialect({ database });
 
 const db = new Kysely<DB>({ dialect });
 
-db.selectFrom("Items")
-  .innerJoin("Recipes", "Recipes.resultId", "Items.id")
-  .innerJoin("translations", "Items.nameId", "translations.id")
+db.selectFrom("ItemData")
+  .innerJoin("RecipeData", "RecipeData.resultId", "ItemData.id")
+  .innerJoin("translations", "ItemData.nameId", "translations.id")
   .select(["translations.value as name"])
-  .selectAll(["Recipes"])
+  .selectAll(["RecipeData"])
   .where("translations.value", "like", "%potion%")
+  .where("translations.lang", "=", "fr")
   .execute()
   .then((data) => {
     console.log(data);

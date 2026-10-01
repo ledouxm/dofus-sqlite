@@ -70,6 +70,8 @@ jobs:
 
             - name: Check if should release
               id: check
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   if [ "${{ github.event_name }}" = "push" ]; then
                     echo "should_release=true" >> $GITHUB_OUTPUT
@@ -78,7 +80,13 @@ jobs:
                     echo "should_release=true" >> $GITHUB_OUTPUT
                     echo "is_dev=false" >> $GITHUB_OUTPUT
                   elif [ "${{ steps.version.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
-                    echo "should_release=true" >> $GITHUB_OUTPUT
+                    TAG="v${{ steps.tag.outputs.tag }}"
+                    if gh release view "$TAG" --repo "${{ github.repository }}" &>/dev/null; then
+                      echo "Release $TAG already exists, skipping"
+                      echo "should_release=false" >> $GITHUB_OUTPUT
+                    else
+                      echo "should_release=true" >> $GITHUB_OUTPUT
+                    fi
                     echo "is_dev=false" >> $GITHUB_OUTPUT
                   else
                     echo "should_release=false" >> $GITHUB_OUTPUT
@@ -125,6 +133,7 @@ jobs:
                   NOTES+="Release contains:"$'\n'$'\n'
                   NOTES+="- dofus.sqlite database file"$'\n'
                   NOTES+="- maps.sqlite map interactions database"$'\n'
+                  NOTES+="- game images (items, monsters, spells, ...), one images-<category>.zip per category"$'\n'
                   NOTES+="- i18n files"$'\n'
                   NOTES+="- Dofus 3 data files (quests, achievements, mapPositions, ...)"$'\n'
                   NOTES+="- Dofus obfuscated proto file"$'\n'$'\n'
