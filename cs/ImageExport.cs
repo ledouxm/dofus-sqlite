@@ -3,12 +3,20 @@ using System.Text.RegularExpressions;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using AssetsTools.NET.Texture;
+using SkiaSharp;
 
 // Exports the textures of Picto/**/*.bundle as PNGs, one zip per category
 // (item_assets_1x.bundle + item_assets_2x.bundle -> images-item.zip)
 public static class ImageExport
 {
-    private const string BuiltAssetsPrefix = "Assets/BuiltAssets/";
+    // Asset folders whose next segment is a grouping folder: "Assets/BuiltAssets/<category>/",
+    // "Assets/UI/Themes/<theme>/" (uidarkstone_assets_all.bundle, worldmap hint icons)
+    private static readonly string[] AssetRoots = ["Assets/BuiltAssets/", "Assets/UI/Themes/"];
+
+    // Photographic categories are exported as lossy WebP: as PNGs, worldmap chunks weigh 0.5-2 MB each
+    private static readonly HashSet<string> LossyCategories = ["worldmap"];
+    private const int WebpQuality = 85;
+    private const byte OpaqueAlpha = 250;
 
     // Textures are read in batches so huge bundles (worldmaps are ~1200 1024x1024 tiles)
     // never hold every decoded image in memory at once
@@ -52,7 +60,7 @@ public static class ImageExport
                 var usedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var bundle in category.OrderBy(bundle => bundle.path, StringComparer.Ordinal))
                 {
-                    count += ExportBundle(bundle.path, bundle.match.Groups["variant"].Value, zip, usedPaths);
+                    count += ExportBundle(bundle.path, bundle.match.Groups["variant"].Value, LossyCategories.Contains(category.Key), zip, usedPaths);
                 }
             }
 
@@ -61,14 +69,16 @@ public static class ImageExport
         }
     }
 
-    private static int ExportBundle(string bundlePath, string variant, ZipArchive zip, HashSet<string> usedPaths)
+    private static int ExportBundle(string bundlePath, string variant, bool lossy, ZipArchive zip, HashSet<string> usedPaths)
     {
         var manager = new AssetsManager();
         try
         {
             var bundle = manager.LoadBundleFile(bundlePath, true);
             var assetsFile = manager.LoadAssetsFileFromBundle(bundle, 0, false);
-            var entries = ResolveZipPaths(manager, assetsFile, variant, usedPaths, Path.GetFileName(bundlePath));
+            var catalogKeys = ReadCatalogKeys(bundlePath);
+            var extension = lossy ? ".webp" : ".png";
+            var entries = ResolveZipPaths(manager, assetsFile, variant, catalogKeys, extension, usedPaths, Path.GetFileName(bundlePath));
 
             foreach (var batch in entries.Chunk(BatchSize))
             {
@@ -89,12 +99,14 @@ public static class ImageExport
                         throw new InvalidDataException(
                             $"{Path.GetFileName(bundlePath)}: can't decode '{texture.m_Name}' ({(TextureFormat)texture.m_TextureFormat}, {texture.m_Width}x{texture.m_Height})");
                     }
-                    pngs[i] = Png.EncodeBgraBottomUp(bgra, texture.m_Width, texture.m_Height);
+                    pngs[i] = lossy
+                        ? EncodeWebp(bgra, texture.m_Width, texture.m_Height)
+                        : Png.EncodeBgraBottomUp(bgra, texture.m_Width, texture.m_Height);
                 });
 
                 for (int i = 0; i < textures.Length; i++)
                 {
-                    // PNGs are already deflated, compressing them again only costs time
+                    // PNGs and WebPs are already compressed, compressing them again only costs time
                     var zipEntry = zip.CreateEntry(textures[i].entry.ZipPath, CompressionLevel.NoCompression);
                     zipEntry.LastWriteTime = EntryTimestamp;
                     using var stream = zipEntry.Open();
@@ -110,11 +122,46 @@ public static class ImageExport
         }
     }
 
-    // Prefers the original asset path ("Assets/BuiltAssets/emblems/big/up/1x/114.png" -> "big/up/1x/114.png").
-    // Some bundles only have GUIDs in their container, there the texture name is used,
-    // suffixed with its size (then an index) when several textures share a name
+    // Input is BGRA with bottom-up rows (Unity's layout)
+    private static byte[] EncodeWebp(byte[] bgra, int width, int height)
+    {
+        // Compressed textures store opaque pixels with an alpha of 254: kept, it would make the image
+        // slightly see-through, so a nearly opaque image is encoded as an opaque one
+        var opaque = true;
+        for (int i = 3; i < bgra.Length && opaque; i += 4) opaque = bgra[i] >= OpaqueAlpha;
+        // libwebp leaves the alpha channel out only when every pixel is fully opaque
+        if (opaque) for (int i = 3; i < bgra.Length; i += 4) bgra[i] = 255;
+        using var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Bgra8888, opaque ? SKAlphaType.Opaque : SKAlphaType.Unpremul));
+        var pixels = bitmap.GetPixelSpan();
+        int stride = width * 4;
+        for (int y = 0; y < height; y++)
+        {
+            bgra.AsSpan((height - 1 - y) * stride, stride).CopyTo(pixels.Slice(y * stride, stride));
+        }
+        using var pixmap = bitmap.PeekPixels();
+        using var webp = pixmap.Encode(new SKWebpEncoderOptions(SKWebpEncoderCompression.Lossy, WebpQuality))
+            ?? throw new InvalidDataException($"Can't encode a {width}x{height} image as WebP");
+        return webp.ToArray();
+    }
+
+    // Keys of the Addressables catalog shipped next to the bundle (Picto/Worldmaps/catalog_1.0.bin), by GUID
+    private static Dictionary<string, string> ReadCatalogKeys(string bundlePath)
+    {
+        var catalogs = Directory.GetFiles(Path.GetDirectoryName(bundlePath)!, "catalog_*.bin");
+        return catalogs
+            .SelectMany(AddressablesCatalog.ReadKeysByInternalId)
+            .GroupBy(entry => entry.Key)
+            .ToDictionary(group => group.Key, group => group.First().Value);
+    }
+
+    // Prefers the original asset path ("Assets/BuiltAssets/emblems/big/up/1x/114.png" -> "big/up/1x/114.png",
+    // "Assets/UI/Themes/darkStone/hints/10.png" -> "hints/10.png").
+    // Some bundles only have GUIDs in their container: their catalog key is used instead
+    // ("worldmaps/1/0.6/12.jpg" -> "1/0.6/12.webp"), else the texture name, suffixed with
+    // its size (then an index) when several textures share a name
     private static List<TextureEntry> ResolveZipPaths(
-        AssetsManager manager, AssetsFileInstance assetsFile, string variant, HashSet<string> usedPaths, string bundleName)
+        AssetsManager manager, AssetsFileInstance assetsFile, string variant, Dictionary<string, string> catalogKeys,
+        string extension, HashSet<string> usedPaths, string bundleName)
     {
         var containerPaths = new Dictionary<long, string>();
         var assetBundles = assetsFile.file.GetAssetsOfType(AssetClassID.AssetBundle);
@@ -152,11 +199,17 @@ public static class ImageExport
         foreach (var texture in textures)
         {
             string path;
-            if (texture.containerPath != null && texture.containerPath.StartsWith(BuiltAssetsPrefix, StringComparison.OrdinalIgnoreCase))
+            var root = AssetRoots.FirstOrDefault(root => texture.containerPath?.StartsWith(root, StringComparison.OrdinalIgnoreCase) == true);
+            if (root != null)
             {
                 // Drop the "Assets/BuiltAssets/<category>/" part
-                var segments = texture.containerPath[BuiltAssetsPrefix.Length..].Split('/');
-                path = Path.ChangeExtension(string.Join('/', segments.Skip(1)), ".png");
+                var segments = texture.containerPath![root.Length..].Split('/');
+                path = Path.ChangeExtension(string.Join('/', segments.Skip(1)), extension);
+            }
+            else if (texture.containerPath != null && catalogKeys.TryGetValue(texture.containerPath, out var key) && key.Contains('/'))
+            {
+                // Drop the "worldmaps/" part
+                path = Path.ChangeExtension(key[(key.IndexOf('/') + 1)..], extension);
             }
             else
             {
@@ -171,12 +224,12 @@ public static class ImageExport
                         name += "_" + index;
                     }
                 }
-                path = folder + name + ".png";
+                path = folder + name + extension;
             }
 
             if (!usedPaths.Add(path))
             {
-                var deduplicated = Path.ChangeExtension(path, null) + "_" + texture.pathId + ".png";
+                var deduplicated = Path.ChangeExtension(path, null) + "_" + texture.pathId + extension;
                 Console.WriteLine($"Warning: {bundleName}: '{path}' already exists, writing '{deduplicated}' instead");
                 usedPaths.Add(deduplicated);
                 path = deduplicated;

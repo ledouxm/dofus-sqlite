@@ -110,6 +110,8 @@ if ($SkipDownload) {
             --select "**/StreamingAssets/Content/I18n/*.bin" `
             --select "**/StreamingAssets/Content/Map/Data/**/*.bundle" `
             --select "**/StreamingAssets/Content/Picto/**/*.bundle" `
+            --select "**/StreamingAssets/Content/Picto/**/catalog_*.bin" `
+            --select "**/StreamingAssets/aa/StandaloneWindows64/uidarkstone_assets_all.bundle" `
             --select "**/GameAssembly.dll" `
             --select "**/global-metadata.dat"
         if ($LASTEXITCODE -ne 0) { throw "cytrus-v6 download failed" }
@@ -182,6 +184,11 @@ if ($SkipImages) {
     dotnet "$ScriptRoot\cs\bin\Release\net8.0\unity-bundle-unwrap.dll" images `
         "$ScriptRoot\parser\temp\Dofus_Data\StreamingAssets\Content\Picto" `
         "$ScriptRoot\parser\images"
+    if ($LASTEXITCODE -ne 0) { throw "image export failed" }
+    # UI theme bundle (worldmap hint icons), outside of Content\Picto
+    dotnet "$ScriptRoot\cs\bin\Release\net8.0\unity-bundle-unwrap.dll" images `
+        "$ScriptRoot\parser\temp\Dofus_Data\StreamingAssets\aa" `
+        "$ScriptRoot\parser\images" --only uidarkstone
     if ($LASTEXITCODE -ne 0) { throw "image export failed" }
 }
 

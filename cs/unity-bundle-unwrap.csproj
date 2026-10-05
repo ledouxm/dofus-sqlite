@@ -16,6 +16,8 @@
     <PackageReference Include="AssetsTools.NET.Texture" Version="3.0.2" />
     <PackageReference Include="DotMake.CommandLine" Version="1.8.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SkiaSharp" Version="4.153.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
   </ItemGroup>
 
 </Project>

@@ -108,6 +108,8 @@ jobs:
               run: >
                   npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-picto/
                   --select **/StreamingAssets/Content/Picto/**/*.bundle
+                  --select **/StreamingAssets/Content/Picto/**/catalog_*.bin
+                  --select **/StreamingAssets/aa/StandaloneWindows64/uidarkstone_assets_all.bundle
 
             - name: Upload data-files artifact
               uses: actions/upload-artifact@v4
