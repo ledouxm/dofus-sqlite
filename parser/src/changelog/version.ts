@@ -102,8 +102,9 @@ export const parseJson = <T = any>(value: unknown, fallback: T): T => {
 export const unwrapArray = <T = any>(value: unknown): T[] =>
   Array.isArray(value) ? value : value && typeof value === "object" && Array.isArray((value as any).Array) ? (value as any).Array : [];
 
+/** Since 3.7 the game calls the effect `actionId` (EffectData.id, what `effectId` used to be) */
 export const effectInstance = (data: Record<string, any>): EffectInstance => ({
-  effectId: data.effectId,
+  effectId: data.effectId ?? data.actionId,
   diceNum: data.diceNum ?? 0,
   diceSide: data.diceSide ?? 0,
   value: data.value ?? 0,
