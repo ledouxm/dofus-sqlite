@@ -6,10 +6,15 @@ using AssetsTools.NET.Extra;
 
 // Extracts interactive elements from Map/Data/mapdata_assets_world_*.bundle.
 // Dumping these bundles to JSON is slow (they're mostly shader parameters), so only the
-// ClientInteractiveAnimatedElementTransform references are read, bundles in parallel
+// interactive element references are read, bundles in parallel
 public static class MapInteractions
 {
-    private const string InteractiveClass = "ClientInteractiveAnimatedElementTransform";
+    // 3.7 renamed the class and its interaction id field; bundles that weren't rebuilt keep the old names
+    private static readonly Dictionary<string, string> InteractionIdFieldByClass = new()
+    {
+        ["ClientInteractiveAnimatedElementTransform"] = "m_interactionId",
+        ["ClientInteractiveMapAnimatedElement"] = "<interactiveId>k__BackingField",
+    };
 
     private static readonly Regex BundleNameRegex = new(@"^mapdata_assets_world_(?<world>\d+)\.bundle$");
     private static readonly Regex FirstNumberRegex = new(@"\d+");
@@ -88,14 +93,15 @@ public static class MapInteractions
 
                 foreach (var reference in registry.references)
                 {
-                    if (reference.type.ClassName != InteractiveClass || reference.data == null) continue;
+                    if (reference.data == null
+                        || !InteractionIdFieldByClass.TryGetValue(reference.type.ClassName, out var interactionIdField)) continue;
 
                     rows.Add(new Row(
                         mapId,
                         worldId,
                         ReadInteger(reference.data, "gfxId"),
                         ReadInteger(reference.data, "cellId"),
-                        ReadInteger(reference.data, "m_interactionId")));
+                        ReadInteger(reference.data, interactionIdField)));
                 }
             }
 
