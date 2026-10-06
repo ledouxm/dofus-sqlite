@@ -27,3 +27,8 @@ Il2CppDumper/*
 .references
 parser/images/
 parser/temp-*/
+.cache/
+changelog-*.md
+changelog-out/
+changelog-backfill/
+backfill.log

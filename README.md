@@ -147,6 +147,40 @@ dotnet cs/bin/Release/net8.0/unity-bundle-unwrap.dll images <folder with Picto b
 
 `pnpm maps` reads the map bundles (`<INPUT_FOLDER>/Dofus_Data/StreamingAssets/Content/Map/Data`) and writes the interactive elements of every map to `maps.sqlite` (or `MAP_INTERACTIONS_DB`). It doesn't go through JSON: the C# tool's `map-interactions` command reads only those elements, all bundles in parallel.
 
+### Changelog between two releases
+
+`pnpm changelog` compares two releases and writes, in `changelog-out/`:
+
+- `changelog.json`: what changed per entity, for the domains [opendofusdb](https://github.com/ledouxm/opendofusdb) shows (`item`, `set`, `monster`, `dungeon`, `spell`, `quest`, `achievement`, `area`, `subArea`, `worldMap`, `hint`), with the same filters (hidden item types, quest-only monsters, class spells...).
+- `first-seen.json`: the release each entity first appeared in, built on top of the old release's `first-seen.json` when it has one.
+
+```bash
+# Latest release vs the one before it
+pnpm changelog
+
+# Two specific releases
+pnpm changelog v6.0_3.5.17.26 v6.0_3.6.12.16
+
+# A release vs freshly generated local data (CI)
+pnpm changelog v6.0_3.6.12.16 --new-db dofus.sqlite --new-json json --new-tag v6.0_3.6.13.17
+```
+
+Each entry is `{ domain, id, change: "added" | "removed" | "changed", name, meta, changes | snapshot }`. Names are in every language, and `names` lists the name of every object a change links to. Each change has a `kind` that tells how to display it (types in [model.ts](parser/src/changelog/model.ts)):
+
+| kind | Example |
+|---|---|
+| `value` | `{ field: "level", old: 190, new: 200 }` |
+| `text` | a name or description, in every language |
+| `ref` / `refs` | a linked object (`item`, `monster`...) that changed, or linked objects added and removed |
+| `effects` | effect lines, `added` / `removed` / `changed`, as raw effect instances to format like the game does |
+| `list` | entries of a list (monster grades, drops, set bonuses, quest steps...) added, removed or changed, recursively |
+
+Effect lines are paired by effect for rolled values (characteristics, damage), so `+301 to 350 Vitality` becoming `+320 to 400 Vitality` is one changed line, and by effect and target for the others (a modified spell, a summoned monster). Item effects and set bonuses are read from `itemsdata.json` and `itemsetsdata.json`, since the database cannot link effects to their item.
+
+Each release gets both files from the `data` job of workflow 2. `pnpm changelog:backfill [--upload]` generates them for every past release: releases from before the current database layout only seed `first-seen.json` with their ids, the others get a changelog against the previous release.
+
+`pnpm changelog:raw` still writes the table-by-table Markdown diff of two databases, for debugging.
+
 ### Running the pipeline locally
 
 Use `run-local.ps1` to replicate the full CI pipeline on your machine:

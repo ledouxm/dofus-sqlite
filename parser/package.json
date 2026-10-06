@@ -9,7 +9,10 @@
         "extract": "vite-node ./src/index.ts",
         "db:dev": "vite-node --watch ./src/generateDb.ts",
         "db": "vite-node ./src/generateDb.ts",
-        "maps": "vite-node ./src/mapInteractions.ts"
+        "maps": "vite-node ./src/mapInteractions.ts",
+        "changelog": "vite-node ./src/changelog/index.ts",
+        "changelog:raw": "vite-node ./src/rawChangelog.ts",
+        "changelog:backfill": "vite-node ./src/changelog/backfill.ts"
     },
     "keywords": [],
     "author": "",
