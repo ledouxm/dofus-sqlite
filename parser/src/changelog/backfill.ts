@@ -41,7 +41,13 @@ const LEGACY_TABLES: Record<Domain, string[]> = {
   hint: ["Hints"],
 };
 
-const removeRelease = (release: GithubRelease) => fs.rm(path.join(args.cache!, release.tag_name), { recursive: true, force: true });
+/**
+ * The first releases miss most items (1,776 instead of about 19,900 from v6.0_3.0.37.25 on): starting from them
+ * would date every other item to v6.0_3.0.37.25, so tracking starts with the first full release
+ */
+const INCOMPLETE_RELEASES = new Set(["v6.0_3.0.34.23", "v6.0_3.0.36.24"]);
+
+const removeRelease =(release: GithubRelease) => fs.rm(path.join(args.cache!, release.tag_name), { recursive: true, force: true });
 
 /** Marks the ids not seen yet as first seen in `tag` (null for the first release: they were there at launch) */
 const markSeen = (firstSeen: FirstSeen, domain: Domain, ids: Iterable<number>, tag: string | null) => {
@@ -65,7 +71,9 @@ async function write(tag: string, files: Record<string, unknown>) {
 }
 
 const main = async () => {
-  const releases = publishedReleases(await fetchReleases(args.repo!)).reverse();
+  const releases = publishedReleases(await fetchReleases(args.repo!))
+    .reverse()
+    .filter((release) => !INCOMPLETE_RELEASES.has(release.tag_name));
   console.log(`${releases.length} releases, from ${releases[0].tag_name} to ${releases.at(-1)!.tag_name}`);
 
   const firstSeen: FirstSeen = { schemaVersion: SCHEMA_VERSION, release: "", firstSeen: {} };
