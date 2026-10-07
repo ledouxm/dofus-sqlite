@@ -24,6 +24,7 @@ Il2CppDumper/*
 !Il2CppDumper/Il2CppDumper*
 !Il2CppDumper/config.json
 !Il2CppDumper/protodec.exe
+!Il2CppDumper/Mono.Cecil*.dll
 .references
 parser/images/
 parser/temp-*/
