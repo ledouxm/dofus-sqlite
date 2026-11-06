@@ -1,0 +1,114 @@
+name: 1 - Check Beta Version and Create Pre-release
+# Same pipeline as "1 - Check Version and Create Pre-release", for the beta client (Cytrus release "beta").
+#
+# Beta releases are tagged v<version>-beta and stay pre-releases forever: they are never marked as latest,
+# so /releases/latest, `gh release list --exclude-pre-releases` and every tool reading published releases
+# keep getting the live game. "2 - Populate Release" reads the channel from the -beta tag suffix.
+on:
+    workflow_dispatch:
+
+    # Offset from the live check (minute 0) so both do not start together
+    schedule:
+        - cron: "30 * * * *"
+
+permissions:
+    contents: write
+
+jobs:
+    check-version:
+        name: Check Beta Game Version
+        runs-on: ubuntu-latest
+        outputs:
+            should_release: ${{ steps.check.outputs.should_release }}
+            release_tag: ${{ steps.check.outputs.tag }}
+
+        steps:
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install cytrus-v6
+              run: npm i -g cytrus-v6@0.1.1
+
+            - name: Get current beta version
+              id: version
+              run: echo "version=$(cytrus-v6 version --game dofus --release beta)" >> $GITHUB_OUTPUT
+
+            - name: Check if should release
+              id: check
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  VERSION: ${{ steps.version.outputs.version }}
+              run: |
+                  if [ -z "$VERSION" ]; then
+                    echo "Could not read the beta version"
+                    exit 1
+                  fi
+                  TAG="${VERSION}-beta"
+                  echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+                  if gh release view "v${TAG}" --repo "${{ github.repository }}" &>/dev/null; then
+                    echo "Release v${TAG} already exists, skipping"
+                    echo "should_release=false" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.event_name }}" != "workflow_dispatch" ] && gh release view "v${VERSION}" --repo "${{ github.repository }}" &>/dev/null; then
+                    # The beta runs the build already released on the live game: same data
+                    echo "Live release v${VERSION} already exists, skipping"
+                    echo "should_release=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "should_release=true" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Save release tag to artifact
+              if: steps.check.outputs.should_release == 'true'
+              run: |
+                  mkdir -p release-tag
+                  echo "${{ steps.check.outputs.tag }}" > release-tag/tag.txt
+
+            - name: Upload release tag artifact
+              if: steps.check.outputs.should_release == 'true'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: release-tag
+                  path: release-tag/tag.txt
+                  retention-days: 1
+
+    create-prerelease:
+        name: Create Beta Pre-release
+        needs: check-version
+        if: needs.check-version.outputs.should_release == 'true'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Create pre-release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  TAG="v${{ needs.check-version.outputs.release_tag }}"
+
+                  if gh release view "$TAG" --repo "${{ github.repository }}" &>/dev/null; then
+                    echo "Release $TAG already exists, skipping creation"
+                    exit 0
+                  fi
+
+                  NOTES="**Beta client data**: this pre-release comes from the Dofus beta, not the live game. It is never marked as latest."$'\n'$'\n'
+                  NOTES+="Quick links:"$'\n'
+                  NOTES+="  - [dofus.sqlite](https://github.com/${{ github.repository }}/releases/download/${TAG}/dofus.sqlite)"$'\n'
+                  NOTES+="  - [dofus.proto](https://github.com/${{ github.repository }}/releases/download/${TAG}/dofus.proto)"$'\n'
+                  NOTES+="  - [maps.sqlite](https://github.com/${{ github.repository }}/releases/download/${TAG}/maps.sqlite)"$'\n'$'\n'
+                  NOTES+="Release contains:"$'\n'$'\n'
+                  NOTES+="- dofus.sqlite database file"$'\n'
+                  NOTES+="- maps.sqlite map interactions database"$'\n'
+                  NOTES+="- game images (items, monsters, spells, ...), one images-<category>.zip per category"$'\n'
+                  NOTES+="- i18n files"$'\n'
+                  NOTES+="- Dofus 3 data files (quests, achievements, mapPositions, ...)"$'\n'
+                  NOTES+="- Dofus obfuscated proto file"$'\n'
+                  NOTES+="- changelog.json: changes compared with the latest live release"$'\n'$'\n'
+                  NOTES+="This release is auto-generated."
+
+                  gh release create "$TAG" \
+                    --repo "${{ github.repository }}" \
+                    --title "Beta ${{ needs.check-version.outputs.release_tag }}" \
+                    --notes "$NOTES" \
+                    --prerelease \
+                    --latest=false

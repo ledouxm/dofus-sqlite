@@ -22,6 +22,10 @@ Each release contains the following files:
 
 _Note: This repo contains the extraction code that creates these releases. If you just want the data, you don't need to clone this repository._
 
+### Beta releases
+
+The Dofus beta client is extracted the same way, into releases tagged `v<version>-beta` (e.g. `v6.0_3.7.3.3-beta`). They always stay **pre-releases** and are never marked as latest, so `releases/latest`, the GitHub API `/releases/latest` endpoint and anything skipping pre-releases keep getting the live game. Their `changelog.json` compares the beta with the latest live release.
+
 ## Usage with [kysely](https://github.com/kysely-org/kysely)
 
 1. Install dependencies
@@ -115,7 +119,9 @@ Releases are produced by 2 GitHub Actions workflows that chain together automati
 - **maps**: parses `Map/Data/**/*.bundle` → `maps.sqlite` (`pnpm maps`)
 - **images**: exports `Picto/**/*.bundle` → `images-<category>.zip` (`dotnet cs/... images <picto folder> <output folder>`)
 
-Once all four succeed, the release is promoted from pre-release to latest (dev releases stay drafts). Workflow 2 also supports `workflow_dispatch` with a `release_tag` input to re-populate an existing pre-release without re-running the version check; uploads overwrite existing assets.
+**Workflow 1 (beta)** (`1-check-beta-version.yaml`, hourly at minute 30 or manual dispatch) does the same for the beta client (Cytrus release `beta`): it creates the pre-release `v<version>-beta` when that release does not exist yet, and skips beta builds already released on the live game. Workflow 2 picks the beta client for any tag ending in `-beta`.
+
+Once all four succeed, the release is promoted from pre-release to latest (dev releases stay drafts, beta releases stay pre-releases). Workflow 2 also supports `workflow_dispatch` with a `release_tag` input to re-populate an existing pre-release without re-running the version check; uploads overwrite existing assets.
 
 ## Developer Instructions
 

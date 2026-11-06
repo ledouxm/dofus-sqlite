@@ -1,14 +1,14 @@
 name: 2 - Populate Release
 on:
     workflow_run:
-        workflows: ["1 - Check Version and Create Pre-release"]
+        workflows: ["1 - Check Version and Create Pre-release", "1 - Check Beta Version and Create Pre-release"]
         types:
             - completed
 
     workflow_dispatch:
         inputs:
             release_tag:
-                description: "Pre-release tag to populate (e.g. 2.75.0-dev-20240101120000)"
+                description: "Pre-release tag to populate, without the leading v (e.g. 2.75.0-dev-20240101120000; a -beta suffix downloads the beta client)"
                 required: true
                 type: string
 
@@ -48,6 +48,7 @@ jobs:
         if: needs.check-artifact.outputs.exists == 'true'
         outputs:
             release_tag: ${{ steps.tag.outputs.release_tag }}
+            channel: ${{ steps.channel.outputs.channel }}
 
         steps:
             - name: Checkout repository
@@ -71,6 +72,17 @@ jobs:
                     echo "release_tag=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
                   fi
 
+            # Cytrus release to download: tags ending in -beta come from "1 - Check Beta Version", the others from the live game
+            - name: Set game channel
+              id: channel
+              shell: bash
+              run: |
+                  if [[ "${{ steps.tag.outputs.release_tag }}" == *-beta ]]; then
+                    echo "channel=beta" >> $GITHUB_OUTPUT
+                  else
+                    echo "channel=dofus3" >> $GITHUB_OUTPUT
+                  fi
+
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
@@ -89,24 +101,24 @@ jobs:
 
             - name: Download data bundles
               run: >
-                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-data/
+                  npx cytrus-v6 download --game dofus --release ${{ steps.channel.outputs.channel }} --output parser/temp-data/
                   --select **/StreamingAssets/Content/Data/**/*.bundle
                   --select **/StreamingAssets/Content/I18n/*.bin
 
             - name: Download game binaries
               run: >
-                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-binaries/
+                  npx cytrus-v6 download --game dofus --release ${{ steps.channel.outputs.channel }} --output parser/temp-binaries/
                   --select **/GameAssembly.dll
                   --select **/global-metadata.dat
 
             - name: Download map bundles
               run: >
-                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-maps/
+                  npx cytrus-v6 download --game dofus --release ${{ steps.channel.outputs.channel }} --output parser/temp-maps/
                   --select **/StreamingAssets/Content/Map/Data/**/*.bundle
 
             - name: Download picto bundles
               run: >
-                  npx cytrus-v6 download --game dofus --release dofus3 --output parser/temp-picto/
+                  npx cytrus-v6 download --game dofus --release ${{ steps.channel.outputs.channel }} --output parser/temp-picto/
                   --select **/StreamingAssets/Content/Picto/**/*.bundle
                   --select **/StreamingAssets/Content/Picto/**/catalog_*.bin
                   --select **/StreamingAssets/aa/StandaloneWindows64/uidarkstone_assets_all.bundle
@@ -341,6 +353,9 @@ jobs:
                   TAG="v${{ needs.setup.outputs.release_tag }}"
                   if echo "$TAG" | grep -q "\-dev\-"; then
                     echo "Dev release, skipping promotion"
+                  elif [[ "$TAG" == *-beta ]] || [ "${{ needs.setup.outputs.channel }}" = "beta" ]; then
+                    # Beta releases stay pre-releases so /releases/latest and its users keep the live game
+                    echo "Beta release, kept as a pre-release"
                   else
                     gh release edit "$TAG" --repo "${{ github.repository }}" --prerelease=false --latest
                     echo "Promoted $TAG to full release"
