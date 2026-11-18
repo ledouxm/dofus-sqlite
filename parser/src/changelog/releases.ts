@@ -20,13 +20,37 @@ export const githubHeaders = () => ({
     : {}),
 });
 
+/** GitHub answers 5xx and 429 now and then (a 504 cost v6.0_3.7.14.18 its changelog): worth trying again, unlike a 404 */
+const isTransient = (error: unknown) => {
+  if (!axios.isAxiosError(error)) return false;
+  const status = error.response?.status;
+  return status === undefined || status >= 500 || status === 429;
+};
+
+/** Runs `request` again after 2, 4, 8, 16 and 32 seconds while it fails with a transient error */
+export async function withRetry<T>(label: string, request: () => Promise<T>, attempts = 6): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await request();
+    } catch (error) {
+      if (attempt >= attempts || !isTransient(error)) throw error;
+      const delay = 1000 * 2 ** attempt;
+      const reason = axios.isAxiosError(error) ? (error.response?.status ?? error.code) : error;
+      console.warn(`${label} failed (${reason}), retrying in ${delay / 1000}s (${attempt}/${attempts - 1})`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export async function fetchReleases(repo: string) {
   const releases: GithubRelease[] = [];
   for (let page = 1; ; page++) {
-    const { data } = await axios.get<GithubRelease[]>(`https://api.github.com/repos/${repo}/releases`, {
-      headers: githubHeaders(),
-      params: { per_page: 100, page },
-    });
+    const { data } = await withRetry(`Listing releases of ${repo} (page ${page})`, () =>
+      axios.get<GithubRelease[]>(`https://api.github.com/repos/${repo}/releases`, {
+        headers: githubHeaders(),
+        params: { per_page: 100, page },
+      })
+    );
     releases.push(...data);
     if (data.length < 100) return releases;
   }
@@ -68,13 +92,14 @@ export async function downloadAsset(release: GithubRelease, name: string, cacheD
 
   console.log(`Downloading ${release.tag_name}/${name} (${(asset.size / 1e6).toFixed(1)} MB)`);
   await fs.mkdir(path.dirname(file), { recursive: true });
-  const response = await axios.get(asset.url, {
-    headers: { ...githubHeaders(), Accept: "application/octet-stream" },
-    responseType: "stream",
-  });
-
   // Download to a temporary name so an interrupted download is never mistaken for a cached one
-  await pipeline(response.data, createWriteStream(`${file}.part`));
+  await withRetry(`Downloading ${release.tag_name}/${name}`, async () => {
+    const response = await axios.get(asset.url, {
+      headers: { ...githubHeaders(), Accept: "application/octet-stream" },
+      responseType: "stream",
+    });
+    await pipeline(response.data, createWriteStream(`${file}.part`));
+  });
   await fs.rename(`${file}.part`, file);
   return file;
 }
